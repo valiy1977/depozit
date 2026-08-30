@@ -1048,10 +1048,76 @@ function rptPeriodChange(){const v=document.getElementById('rpt-period')?.value;
 function getRptDateRange(){const v=document.getElementById('rpt-period')?.value||'today';const now=new Date();const fmt=d=>d.toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'});if(v==='today')return{from:fmt(now),to:fmt(now),label:'Azi — '+fmt(now)};if(v==='week'){const mon=new Date(now);mon.setDate(now.getDate()-now.getDay()+1);return{from:fmt(mon),to:fmt(now),label:'Săptămâna aceasta'};}if(v==='month'){const m1=new Date(now.getFullYear(),now.getMonth(),1);return{from:fmt(m1),to:fmt(now),label:'Luna aceasta'};}if(v==='custom'){const f=document.getElementById('rpt-from')?.value,t=document.getElementById('rpt-to')?.value;if(!f||!t)return null;const cvt=s=>{const[y,m,d]=s.split('-');return d+'.'+m+'.'+y;};return{from:cvt(f),to:cvt(t),label:cvt(f)+' — '+cvt(t)};}return null;}
 function dateInRange(ds,from,to){const p=s=>{const[d,m,y]=s.split('.');return new Date(y,m-1,d);};return p(ds)>=p(from)&&p(ds)<=p(to);}
 function getAllLogs(){const logs=(history.actLog||[]).map(l=>({...l}));const curT=nowTime(),curD=nowDate();state.persons.filter(p=>p.actId&&p.startTime).forEach(p=>{const act=state.activities.find(a=>a.id===p.actId);logs.push({id:'cur_'+p.id,personName:p.name,company:p.company||'',role:p.role||'',actId:p.actId,actLabel:act?act.label:'—',date:p.startDate||curD,start:p.startTime,stop:curT+'*',duration:calcDuration(p.startTime,curT)+'*'});});return logs;}
-function renderRaport(){const range=getRptDateRange();if(!range)return;document.getElementById('rpt-period-label').textContent=range.label;const allLogs=getAllLogs().filter(l=>dateInRange(l.date,range.from,range.to));const sm={};allLogs.forEach(l=>{const k=l.date+'__'+l.personName;if(!sm[k])sm[k]={date:l.date,name:l.personName,company:l.company,role:l.role,fs:'99:99',ls:'00:00',tm:0,acts:new Set()};const s=sm[k];const st=l.start||'',sp=(l.stop||'').replace('*','');if(st&&st!=='—'&&st<s.fs)s.fs=st;if(sp&&sp!=='—'&&sp>s.ls)s.ls=sp;const dur=(l.duration||'').replace('*','');if(dur&&dur!=='—'){const[h,m]=dur.split(':').map(Number);if(!isNaN(h)&&!isNaN(m))s.tm+=h*60+m;}s.acts.add(l.actLabel);});const tbody=document.getElementById('rpt-rezumat-body');const rows=Object.values(sm).sort((a,b)=>a.date.localeCompare(b.date)||a.name.localeCompare(b.name));if(!rows.length){tbody.innerHTML='<tr><td colspan="8" class="rpt-empty">Nicio înregistrare în această perioadă.</td></tr>';}else{tbody.innerHTML=rows.map(s=>{const h=Math.floor(s.tm/60),m=s.tm%60;const tot=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');return`<tr><td><span class="link-cell" onclick="filterDesf('"+s.name.replace(/'/g,"\\\\'")+"','"+s.date+"')">${s.name}</span></td><td>${s.company}</td><td>${s.role}</td><td>${s.date}</td><td>${s.fs==='99:99'?'—':s.fs}</td><td>${s.ls==='00:00'?'—':s.ls}</td><td><span class="tag-dur">${tot}</span></td><td style="font-size:12px;color:var(--text2)">${[...s.acts].join(', ')}</td></tr>`;}).join('');}renderDesf(allLogs);}
-function filterDesf(name,date){rptFilterName=name;rptFilterDate=date;const range=getRptDateRange();if(!range)return;renderDesf(getAllLogs().filter(l=>dateInRange(l.date,range.from,range.to)));document.getElementById('rpt-desf-card').scrollIntoView({behavior:'smooth',block:'start'});}
-function clearRptFilter(){rptFilterName=null;rptFilterDate=null;const range=getRptDateRange();if(!range)return;renderDesf(getAllLogs().filter(l=>dateInRange(l.date,range.from,range.to)));}
-function renderDesf(logs){let filtered=logs;const fb=document.getElementById('active-filter-container'),cb=document.getElementById('rpt-clear-filter'),tt=document.getElementById('rpt-desf-title');if(rptFilterName){filtered=logs.filter(l=>l.personName===rptFilterName&&(!rptFilterDate||l.date===rptFilterDate));tt.textContent='Desfășurător — '+rptFilterName+(rptFilterDate?' · '+rptFilterDate:'');cb.style.display='';fb.innerHTML='<div class="active-filter-bar">Filtru activ: <strong>'+rptFilterName+'</strong>'+(rptFilterDate?' · '+rptFilterDate:'')+' <button onclick="clearRptFilter()" style="background:none;border:none;color:var(--accent-text);cursor:pointer;font-size:14px;margin-left:4px">✕</button></div>';}else{tt.textContent='Desfășurător activități';cb.style.display='none';fb.innerHTML='';}const tbody=document.getElementById('rpt-desf-body');const sorted=filtered.sort((a,b)=>a.date.localeCompare(b.date)||a.personName.localeCompare(b.personName)||(a.start||'').localeCompare(b.start||''));if(!sorted.length){tbody.innerHTML='<tr><td colspan="6" class="rpt-empty">Nicio înregistrare.</td></tr>';return;}tbody.innerHTML=sorted.map(l=>{const act=state.activities.find(a=>a.id===l.actId);const color=act?act.color:'#9ba3bb';return`<tr><td>${l.date}</td><td><span class="link-cell" onclick="filterDesf('"+l.personName.replace(/'/g,"\\\\'")+"',null)">${l.personName}</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:${color}"></span>${l.actLabel}</span></td><td>${l.start||'—'}</td><td>${l.stop||'—'}</td><td><span class="tag-dur">${l.duration||'—'}</span></td></tr>`;}).join('');}
+function renderRaport(){
+  const range=getRptDateRange();if(!range)return;
+  document.getElementById('rpt-period-label').textContent=range.label;
+  const allLogs=getAllLogs().filter(l=>dateInRange(l.date,range.from,range.to));
+  const sm={};
+  allLogs.forEach(l=>{
+    const k=l.date+'__'+l.personName;
+    if(!sm[k]) sm[k]={date:l.date,name:l.personName,company:l.company,role:l.role,fs:'99:99',ls:'00:00',tm:0,acts:new Set()};
+    const s=sm[k];
+    const st=l.start||'',sp=(l.stop||'').replace('*','');
+    if(st&&st!=='—'&&st<s.fs) s.fs=st;
+    if(sp&&sp!=='—'&&sp>s.ls) s.ls=sp;
+    const dur=(l.duration||'').replace('*','');
+    if(dur&&dur!=='—'){const[h,m]=dur.split(':').map(Number);if(!isNaN(h)&&!isNaN(m))s.tm+=h*60+m;}
+    s.acts.add(l.actLabel);
+  });
+  const tbody=document.getElementById('rpt-rezumat-body');
+  window._rptRows=Object.values(sm).sort((a,b)=>a.date.localeCompare(b.date)||a.name.localeCompare(b.name));
+  if(!window._rptRows.length){
+    tbody.innerHTML='<tr><td colspan="8" class="rpt-empty">Nicio înregistrare în această perioadă.</td></tr>';
+  } else {
+    tbody.innerHTML=window._rptRows.map((s,i)=>{
+      const h=Math.floor(s.tm/60),m=s.tm%60;
+      const tot=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+      return '<tr><td><span class="link-cell" onclick="clickRptRow('+i+')">'+s.name+'</span></td><td>'+s.company+'</td><td>'+s.role+'</td><td>'+s.date+'</td><td>'+(s.fs==='99:99'?'—':s.fs)+'</td><td>'+(s.ls==='00:00'?'—':s.ls)+'</td><td><span class="tag-dur">'+tot+'</span></td><td style="font-size:12px;color:var(--text2)">'+ [...s.acts].join(', ')+'</td></tr>';
+    }).join('');
+  }
+  renderDesf(allLogs);
+}
+function clickRptRow(i){
+  const r=window._rptRows[i];if(!r)return;
+  filterDesf(r.name,r.date);
+}
+function filterDesf(name,date){
+  rptFilterName=name;rptFilterDate=date;
+  const range=getRptDateRange();if(!range)return;
+  renderDesf(getAllLogs().filter(l=>dateInRange(l.date,range.from,range.to)));
+  document.getElementById('rpt-desf-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function clearRptFilter(){
+  rptFilterName=null;rptFilterDate=null;
+  const range=getRptDateRange();if(!range)return;
+  renderDesf(getAllLogs().filter(l=>dateInRange(l.date,range.from,range.to)));
+}
+function renderDesf(logs){
+  let filtered=logs;
+  const fb=document.getElementById('active-filter-container'),cb=document.getElementById('rpt-clear-filter'),tt=document.getElementById('rpt-desf-title');
+  if(rptFilterName){
+    filtered=logs.filter(l=>l.personName===rptFilterName&&(!rptFilterDate||l.date===rptFilterDate));
+    tt.textContent='Desfășurător — '+rptFilterName+(rptFilterDate?' · '+rptFilterDate:'');
+    cb.style.display='';
+    fb.innerHTML='<div class="active-filter-bar">Filtru activ: <strong>'+rptFilterName+'</strong>'+(rptFilterDate?' · '+rptFilterDate:'')+' <button onclick="clearRptFilter()" style="background:none;border:none;color:var(--accent-text);cursor:pointer;font-size:14px;margin-left:4px">✕</button></div>';
+  } else {
+    tt.textContent='Desfășurător activități';cb.style.display='none';fb.innerHTML='';
+  }
+  const tbody=document.getElementById('rpt-desf-body');
+  window._desfLogs=filtered.sort((a,b)=>a.date.localeCompare(b.date)||a.personName.localeCompare(b.personName)||(a.start||'').localeCompare(b.start||''));
+  if(!window._desfLogs.length){
+    tbody.innerHTML='<tr><td colspan="6" class="rpt-empty">Nicio înregistrare.</td></tr>';return;
+  }
+  tbody.innerHTML=window._desfLogs.map((l,i)=>{
+    const act=state.activities.find(a=>a.id===l.actId);
+    const color=act?act.color:'#9ba3bb';
+    return '<tr><td>'+l.date+'</td><td><span class="link-cell" onclick="clickDesfRow('+i+')">'+l.personName+'</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:'+color+'"></span>'+l.actLabel+'</span></td><td>'+(l.start||'—')+'</td><td>'+(l.stop||'—')+'</td><td><span class="tag-dur">'+(l.duration||'—')+'</span></td></tr>';
+  }).join('');
+}
+function clickDesfRow(i){
+  const l=window._desfLogs[i];if(!l)return;
+  filterDesf(l.personName,null);
+}
 setInterval(updateClock,1000);
 updateClock();
 init();
