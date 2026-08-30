@@ -73,7 +73,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .person-row:last-child{border-bottom:none}
 .person-row:hover{background:var(--bg3)}
 .avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-bg);color:var(--accent-text);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:1px solid rgba(79,142,247,.2)}
-.person-name{font-size:13px;font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.person-info{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 8px;align-items:center}
+.person-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.person-company{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.person-role{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0}
 .tag-none{background:var(--bg4);color:var(--text3);border:1px solid var(--border)}
 .sc-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
@@ -223,7 +226,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="right-card">
         <div class="right-card-head">
           <span class="section-head">Activități</span>
-          <button class="btn btn-sm" onclick="openModal('activity')">+ Nou</button>
+          <button class="btn btn-sm" onclick="openEditActivities()">✏ Editează</button>
         </div>
         <div id="act-list"></div>
       </div>
@@ -245,6 +248,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             </div>
             <div style="font-size:11px;color:var(--text3);margin-top:3px">scanere peste limita disponibilă</div>
           </div>
+          <div id="sc-breakdown" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)"></div>
         </div>
       </div>
       <div class="right-card">
@@ -276,6 +280,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="rpt-card" id="rpt-desf-card"><div class="rpt-card-head"><span class="rpt-section-title" id="rpt-desf-title">Desfășurător activități</span><button class="btn btn-sm" id="rpt-clear-filter" onclick="clearRptFilter()" style="display:none">✕ Resetează filtru</button></div>
       <div style="overflow-x:auto"><table class="rpt-table"><thead><tr><th>Data</th><th>Nume</th><th>Activitate</th><th>Ora start</th><th>Ora stop</th><th>Durata</th></tr></thead><tbody id="rpt-desf-body"></tbody></table></div></div>
   </div><!-- /panel-raport -->
+<!-- MODAL editare activități -->
+<div class="modal-bg" id="edit-act-bg">
+  <div class="modal" style="width:500px;max-width:96vw" onclick="event.stopPropagation()">
+    <h3 style="margin-bottom:14px">✏ Editează activități</h3>
+    <div id="edit-act-list" style="max-height:320px;overflow-y:auto"></div>
+    <div style="display:flex;gap:7px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)">
+      <input id="new-act-name" placeholder="Nume activitate nouă..." onkeydown="if(event.key==='Enter')addNewActInEdit()" style="flex:1;font-size:13px;font-family:inherit;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#1e2130;color:#f0f1f5;min-width:0;box-sizing:border-box"/>
+      <input type="color" id="new-act-color" value="#4f8ef7" title="Culoare" style="width:36px;height:36px;padding:2px;border-radius:8px;border:1px solid rgba(255,255,255,.15);cursor:pointer;flex-shrink:0;background:none;box-sizing:border-box"/>
+      <button class="btn btn-sm btn-accent" onclick="addNewActInEdit()">+ Adaugă</button>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn" onclick="closeEditActivities()">Anulează</button>
+      <button class="btn btn-accent" onclick="saveEditActivities()">💾 Salvează tot</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL generic -->
 <div class="modal-bg" id="modal-bg" onclick="handleOverlay(event)">
   <div class="modal">
@@ -541,6 +562,23 @@ async function exportExcel(){
 
   const now=new Date();
   const d=now.toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\./g,'-');
+  // Sheet-uri per companie
+  const companyList=[...new Set(state.persons.map(p=>p.company).filter(c=>c&&c.trim()))].sort();
+  companyList.forEach(comp=>{
+    const cPersons=state.persons.filter(p=>p.company===comp);
+    const csData=[['Nume','Functia','Activitate','Scaner','Status']];
+    cPersons.forEach(p=>{
+      const act=state.activities.find(a=>a.id===p.actId);
+      csData.push([p.name,p.role||'',act?act.label:'Nealocată',p.actId&&p.scaner?'Da':'Nu',p.actId?'Alocat':'Liber']);
+    });
+    csData.push([]);
+    csData.push(['Total',cPersons.length]);
+    csData.push(['Alocați',cPersons.filter(p=>p.actId).length]);
+    csData.push(['Cu scaner',cPersons.filter(p=>p.scaner&&p.actId).length]);
+    const csWs=XLSX.utils.aoa_to_sheet(csData);
+    csWs['!cols']=[{wch:22},{wch:16},{wch:16},{wch:10},{wch:10}];
+    XLSX.utils.book_append_sheet(wb,csWs,comp.substring(0,30));
+  });
   XLSX.writeFile(wb, `Alocare_Depozit_${d}.xlsx`);
   showToast('Excel descărcat ✓','ok');
 }
@@ -554,10 +592,11 @@ function renderFilterBar(){
   const el = document.getElementById('filter-bar');
   const lipsaAct = state.activities.find(a=>a.label.toUpperCase()==='LIPSA'||a.label.toUpperCase()==='LIPSĂ');
   const lipsaId  = lipsaAct ? lipsaAct.id : null;
-
   const nealocat = state.persons.filter(p=>!p.actId).length;
+  const companies = [...new Set(state.persons.map(p=>p.company).filter(c=>c&&c.trim()))].sort();
+  const functions = [...new Set(state.persons.map(p=>p.role).filter(r=>r&&r.trim()))].sort();
 
-  // Rând 1: Toți + Lipsă
+  // Rând 1: Toți + Lipsă + Companii + Funcții
   const row1 = [];
   row1.push(`<button class="filter-chip${activeFilter==='all'?' active':''}"
     style="${activeFilter==='all'?'background:var(--accent);border-color:var(--accent);color:#fff':''}"
@@ -574,7 +613,25 @@ function renderFilterBar(){
     </button>`);
   }
 
-  // Rând 2: Nealocați + restul activităților (fără Lipsă)
+  companies.forEach(company=>{
+    const cnt=state.persons.filter(p=>p.company===company).length;
+    const fid='company_'+company;
+    const isA=activeFilter===fid;
+    row1.push(`<button class="filter-chip${isA?' active':''}"
+      style="${isA?'background:var(--text2);border-color:var(--text2);color:var(--bg)':'border-color:var(--border2);color:var(--text2)'}"
+      onclick="setFilter('${fid}')">🏢 ${company} <span style="opacity:.7">${cnt}</span></button>`);
+  });
+
+  functions.forEach(fn=>{
+    const cnt=state.persons.filter(p=>p.role===fn).length;
+    const fid='function_'+fn;
+    const isA=activeFilter===fid;
+    row1.push(`<button class="filter-chip${isA?' active':''}"
+      style="${isA?'background:var(--text3);border-color:var(--text3);color:var(--bg)':'border-color:var(--border);color:var(--text3)'}"
+      onclick="setFilter('${fid}')">👤 ${fn} <span style="opacity:.7">${cnt}</span></button>`);
+  });
+
+  // Rând 2: Nealocați + activități (fără Lipsă)
   const row2 = [];
   row2.push(`<button class="filter-chip${activeFilter==='nealocat'?' active':''}"
     style="${activeFilter==='nealocat'?'background:var(--warning);border-color:var(--warning);color:#1a1d2e':''}"
@@ -623,8 +680,10 @@ function renderPersons(){
 
   // Aplică filtrul
   let filtered = state.persons;
-  if(activeFilter==='nealocat')       filtered = state.persons.filter(p=>!p.actId);
-  else if(activeFilter!=='all')       filtered = state.persons.filter(p=>p.actId===activeFilter);
+  if(activeFilter==='nealocat')             filtered = state.persons.filter(p=>!p.actId);
+  else if(activeFilter.startsWith('company_')) filtered = state.persons.filter(p=>p.company===activeFilter.replace('company_',''));
+  else if(activeFilter.startsWith('function_')) filtered = state.persons.filter(p=>p.role===activeFilter.replace('function_',''));
+  else if(activeFilter!=='all')             filtered = state.persons.filter(p=>p.actId===activeFilter);
 
   if(!filtered.length){
     el.innerHTML=`<div class="empty-row">${activeFilter==='all'?'Nicio persoană. Adaugă sau importă CSV.':'Nicio persoană în această categorie.'}</div>`;
@@ -636,7 +695,11 @@ function renderPersons(){
     const tagSty=act?`background:${hexRgba(act.color,.14)};color:${act.color};border:1px solid ${hexRgba(act.color,.3)}`:'';
     return `<div class="person-row">
       <div class="avatar">${initials(p.name)}</div>
-      <span class="person-name">${p.name}</span>
+      <div class="person-info">
+        <span class="person-name">${p.name}</span>
+        <span class="person-company">${p.company||'—'}</span>
+        <span class="person-role">${p.role||'—'}</span>
+      </div>
       <span class="${act?'tag':'tag tag-none'}" style="${tagSty}">
         ${act?act.label:'Nealocată'}${hasSc?'<span class="sc-dot"></span>':''}${p.startTime&&p.actId?`<span style="font-size:10px;opacity:.65;margin-left:3px">${p.startTime}</span>`:''}
       </span>
@@ -694,6 +757,31 @@ function renderScanere(){
   } else {
     necesarRow.style.display='none';
   }
+  // Breakdown scanere pe activități
+  const bd=document.getElementById('sc-breakdown');
+  if(!bd) return;
+  const actsWithSc=state.activities.map(a=>({...a,persons:state.persons.filter(p=>p.actId===a.id&&p.scaner)})).filter(a=>a.persons.length>0);
+  if(!actsWithSc.length){bd.innerHTML='';return;}
+  let cumul=0;
+  bd.innerHTML=actsWithSc.map(a=>{
+    const cnt=a.persons.length;
+    const overflowStart=Math.max(0,state.totalScanere-cumul);
+    const normal=Math.min(cnt,overflowStart);
+    const over=cnt-normal;
+    cumul+=cnt;
+    const names=a.persons.map((p,i)=>{
+      const isOver=i>=normal;
+      return `<span style="font-size:10px;padding:1px 5px;border-radius:10px;background:${isOver?'var(--danger-bg)':hexRgba(a.color,.12)};color:${isOver?'var(--danger)':a.color};border:1px solid ${isOver?'rgba(248,113,113,.3)':hexRgba(a.color,.25)};white-space:nowrap">${p.name.split(' ')[0]}${isOver?' ⚠':''}</span>`;
+    }).join('');
+    return `<div style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+        <span style="width:7px;height:7px;border-radius:50%;background:${a.color};flex-shrink:0"></span>
+        <span style="font-size:12px;font-weight:600;color:var(--text2);flex:1">${a.label}</span>
+        <span style="font-size:11px;font-weight:700;color:${over>0?'var(--danger)':a.color}">${cnt} sc${over>0?` <span style="color:var(--danger)">(+${over} peste)</span>`:''}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px">${names}</div>
+    </div>`;
+  }).join('');
 }
 
 function renderSummary(){
@@ -893,6 +981,59 @@ function updateClock(){
     now.toLocaleDateString('ro-RO',{weekday:'short',day:'numeric',month:'short'})+' · '+
     now.toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
+
+
+/* ══════════════════ EDITARE ACTIVITĂȚI ══════════════════ */
+let editActivitiesTemp=[];
+function openEditActivities(){
+  userActive(); userActiveUntil=Date.now()+3600000;
+  editActivitiesTemp=state.activities.map(a=>({...a}));
+  renderEditActList();
+  document.getElementById('edit-act-bg').classList.add('open');
+}
+function renderEditActList(){
+  const el=document.getElementById('edit-act-list');if(!el)return;
+  const lipsaId=(editActivitiesTemp.find(a=>a.label.toUpperCase()==='LIPSA'||a.label.toUpperCase()==='LIPSĂ')||{}).id;
+  if(!editActivitiesTemp.length){el.innerHTML='<div style="padding:12px;text-align:center;font-size:13px;color:#5c6480">Nicio activitate.</div>';return;}
+  let html='';
+  for(let i=0;i<editActivitiesTemp.length;i++){
+    const a=editActivitiesTemp[i];const isLipsa=a.id===lipsaId;
+    const lbl=a.label.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    const opac=isLipsa?';opacity:.5':'';
+    html+=`<div draggable="${!isLipsa}" ondragstart="actDragStart(event,${i})" ondragover="actDragOver(event,${i})" ondrop="actDragDrop(event,${i})" ondragend="actDragEnd()" id="erow${i}" style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.08);transition:opacity .15s">`;
+    html+=`<span style="color:${isLipsa?'transparent':'#5c6480'};cursor:${isLipsa?'default':'grab'};font-size:18px;flex-shrink:0;user-select:none">⠿</span>`;
+    html+=`<div id="edot${i}" style="width:10px;height:10px;border-radius:50%;background:${a.color};flex-shrink:0"></div>`;
+    html+=`<input value="${lbl}" ${isLipsa?'disabled':''} oninput="editActivitiesTemp[${i}].label=this.value" placeholder="Nume activitate" style="flex:1;font-size:13px;font-family:inherit;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#1e2130;color:#f0f1f5;min-width:0;box-sizing:border-box${opac}"/>`;
+    html+=`<input type="color" value="${a.color}" ${isLipsa?'disabled':''} oninput="editActivitiesTemp[${i}].color=this.value;document.getElementById('edot${i}').style.background=this.value" style="width:36px;height:36px;padding:2px;border-radius:8px;border:1px solid rgba(255,255,255,.15);cursor:pointer;flex-shrink:0;background:none;box-sizing:border-box${opac}"/>`;
+    if(isLipsa) html+=`<span style="font-size:10px;color:#5c6480;padding:2px 8px;border:1px solid rgba(255,255,255,.08);border-radius:20px;white-space:nowrap">SPECIAL</span>`;
+    else html+=`<button onclick="deleteActInEdit(${i})" style="background:none;border:none;color:#5c6480;cursor:pointer;font-size:17px;padding:2px 6px;border-radius:4px;flex-shrink:0;line-height:1" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='#5c6480'">✕</button>`;
+    html+='</div>';
+  }
+  el.innerHTML=html;
+}
+let actDragIdx=null;
+function actDragStart(e,i){actDragIdx=i;e.dataTransfer.effectAllowed='move';setTimeout(()=>{const r=document.getElementById('erow'+i);if(r)r.style.opacity='.35';},0);}
+function actDragOver(e,i){e.preventDefault();e.dataTransfer.dropEffect='move';document.querySelectorAll('[id^="erow"]').forEach(r=>r.style.borderTop='');const r=document.getElementById('erow'+i);if(r&&i!==actDragIdx)r.style.borderTop='2px solid #4f8ef7';}
+function actDragDrop(e,i){e.preventDefault();if(actDragIdx===null||actDragIdx===i)return;const moved=editActivitiesTemp.splice(actDragIdx,1)[0];editActivitiesTemp.splice(i,0,moved);actDragIdx=null;renderEditActList();}
+function actDragEnd(){actDragIdx=null;document.querySelectorAll('[id^="erow"]').forEach(r=>{r.style.opacity='1';r.style.borderTop='';});}
+function deleteActInEdit(i){editActivitiesTemp.splice(i,1);renderEditActList();}
+function addNewActInEdit(){
+  const name=document.getElementById('new-act-name').value.trim();
+  const color=document.getElementById('new-act-color').value;
+  if(!name){showToast('Introdu un nume','warn');return;}
+  editActivitiesTemp.push({id:'act_'+state.nextAid++,label:name,color});
+  document.getElementById('new-act-name').value='';
+  renderEditActList();
+}
+function saveEditActivities(){
+  const newIds=editActivitiesTemp.map(a=>a.id);
+  state.persons.forEach(p=>{if(p.actId&&!newIds.includes(p.actId)){p.actId=null;p.scaner=false;}});
+  state.activities=editActivitiesTemp;
+  userActiveUntil=0;
+  document.getElementById('edit-act-bg').classList.remove('open');
+  render();pushState();showToast('Activități salvate ✓','ok');
+}
+function closeEditActivities(){userActiveUntil=0;document.getElementById('edit-act-bg').classList.remove('open');}
 
 /* ══════════════════ TABS ══════════════════ */
 function switchTab(tab){
