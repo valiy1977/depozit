@@ -786,8 +786,18 @@ function openModal(mode){
   const title=document.getElementById('modal-title'); const body=document.getElementById('modal-body');
   if(mode==='person'){
     title.textContent='Adaugă persoană';
-    body.innerHTML=`<label>Nume complet</label><input id="m-name" placeholder="Prenume Nume" autofocus/>`;
-    modalCb=()=>{const n=document.getElementById('m-name').value.trim();if(!n)return false;state.persons.push({id:state.nextPid++,name:n,actId:null,scaner:false});showToast('Persoană adăugată','ok');return true;};
+    body.innerHTML=`
+      <label>Nume complet</label><input id="m-name" placeholder="Prenume Nume" autofocus/>
+      <label>Compania</label><input id="m-company" placeholder="ex: SC Exemplu SRL"/>
+      <label>Funcția</label><input id="m-role" placeholder="ex: Operator"/>`;
+    modalCb=()=>{
+      const n=document.getElementById('m-name').value.trim();
+      if(!n)return false;
+      const company=document.getElementById('m-company').value.trim();
+      const role=document.getElementById('m-role').value.trim();
+      state.persons.push({id:state.nextPid++,name:n,company,role,actId:null,scaner:false});
+      showToast('Persoană adăugată','ok');return true;
+    };
   } else if(mode==='activity'){
     title.textContent='Activitate nouă';
     body.innerHTML=`<label>Nume activitate</label><input id="m-aname" placeholder="ex: Sortare" autofocus/>
@@ -851,10 +861,13 @@ function importCSV(e){
     const lines=ev.target.result.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
     let added=0;
     lines.forEach(line=>{
-      const name=line.split(',')[0].replace(/"/g,'').trim();
+      const cols=line.split(',').map(c=>c.replace(/"/g,'').trim());
+      const name=cols[0];
       if(!name||['nume','name'].includes(name.toLowerCase()))return;
+      const company=cols[1]||'';
+      const role=cols[2]||'';
       if(!state.persons.some(p=>p.name.toLowerCase()===name.toLowerCase())){
-        state.persons.push({id:state.nextPid++,name,actId:null,scaner:false});added++;
+        state.persons.push({id:state.nextPid++,name,company,role,actId:null,scaner:false});added++;
       }
     });
     render();pushState();showToast(`Import: ${added} persoane adăugate`,'ok');
