@@ -1,146 +1,1259 @@
-const SHEET_ID = '1Ys-os4rahFI3qolx0vegpsN8kZ43hCJmD_e1bcSE9yc';
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alocare Personal — Activități</title>
+<style>
+:root {
+  --bg:#0f1117;--bg2:#181b23;--bg3:#1e2130;--bg4:#252840;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+  --text:#f0f1f5;--text2:#9ba3bb;--text3:#5c6480;
+  --accent:#4f8ef7;--accent-bg:rgba(79,142,247,0.13);--accent-text:#7aaeff;
+  --success:#34d399;--danger:#f87171;--warning:#fbbf24;
+  --danger-bg:rgba(248,113,113,0.12);--success-bg:rgba(52,211,153,0.1);
+  --radius:8px;--radius-lg:12px;
+}
+[data-theme="light"] {
+  --bg:#f0f2f5;--bg2:#ffffff;--bg3:#f5f6f9;--bg4:#e8eaf0;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);
+  --text:#1a1d2e;--text2:#5c6480;--text3:#9ba3bb;
+  --accent:#2563eb;--accent-bg:rgba(37,99,235,0.08);--accent-text:#1d4ed8;
+  --success:#16a34a;--danger:#dc2626;--warning:#d97706;
+  --danger-bg:rgba(220,38,38,0.08);--success-bg:rgba(22,163,74,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+.tab-nav{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg2);padding:0 20px;position:sticky;top:57px;z-index:19}
+.tab-nav-btn{padding:10px 18px;font-size:13px;font-family:inherit;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;color:var(--text2);font-weight:500;transition:color .15s}
+.tab-nav-btn:hover{color:var(--text)}
+.tab-nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.panel{display:none;padding:0}
+.panel.active{display:block}
+.rpt-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 20px 16px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg)}
+.rpt-toolbar label{font-size:12px;color:var(--text2)}
+.rpt-input{font-size:12px;font-family:inherit;padding:5px 9px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text)}
+.rpt-table{width:100%;border-collapse:collapse;font-size:13px}
+.rpt-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg2)}
+.rpt-table td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+.rpt-table tr:hover td{background:var(--bg3)}
+.rpt-table .link-cell{color:var(--accent);cursor:pointer;text-decoration:underline}
+.rpt-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin:0 20px 16px}
+.rpt-card-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.rpt-section-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+.tag-dur{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:var(--accent-bg);color:var(--accent-text)}
+.rpt-empty{padding:24px;text-align:center;font-size:13px;color:var(--text3)}
+.active-filter-bar{display:flex;align-items:center;gap:8px;margin:0 20px 12px;padding:8px 12px;background:var(--accent-bg);border:1px solid rgba(79,142,247,.25);border-radius:var(--radius);font-size:12px;color:var(--accent-text)}
+.util-bar{width:80px;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:6px}
+.util-fill{height:100%;border-radius:4px;transition:width .3s}
+.util-green{background:#34d399}
+.util-yellow{background:#fbbf24}
+.util-red{background:#f87171}
+.alert-late{color:var(--danger);font-size:11px;margin-left:3px}
+.rpt-summary-bar{display:flex;gap:16px;flex-wrap:wrap;margin:0 20px 14px;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg)}
+.rpt-summary-item{text-align:center}
+.rpt-summary-val{font-size:20px;font-weight:700;line-height:1}
+.rpt-summary-lbl{font-size:10px;color:var(--text3);margin-top:3px;text-transform:uppercase}
+.weekend-row td{background:rgba(79,142,247,.04)!important}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:11px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;font-weight:800}
+.topbar-title{font-size:14px;font-weight:600}
+.topbar-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.clock{font-size:12px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:4px 10px}
+.sync-pill{font-size:11px;padding:4px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;gap:5px}
+.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sdot-ok{background:var(--success)}.sdot-warn{background:var(--warning);animation:blink 1s infinite}.sdot-err{background:var(--danger)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--radius);border:1px solid var(--border2);background:transparent;color:var(--text);font-size:12px;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn:hover{background:var(--bg3)}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:#fff}.btn-accent:hover{opacity:.88;background:var(--accent)}
+.btn-danger{background:var(--danger-bg);border-color:var(--danger);color:var(--danger)}
+.btn-success{background:var(--success-bg);border-color:var(--success);color:var(--success)}
+.btn-sm{padding:4px 9px;font-size:11px}
+.btn-icon{background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 5px;border-radius:4px;font-size:15px;line-height:1}
+.btn-icon:hover{color:var(--danger);background:var(--danger-bg)}
+.btn-dealloc{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;padding:0 3px;border-radius:4px}
+.btn-dealloc:hover{color:var(--danger)}
+.main{display:grid;grid-template-columns:1fr 270px;gap:18px;padding:18px 20px;align-items:start}
+.section-head{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+.section-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.person-list{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.person-row{display:flex;align-items:center;gap:9px;padding:9px 13px;border-bottom:1px solid var(--border);background:var(--bg2);transition:background .12s}
+.person-row:last-child{border-bottom:none}
+.person-row:hover{background:var(--bg3)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-bg);color:var(--accent-text);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:1px solid rgba(79,142,247,.2)}
+.person-info{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 8px;align-items:center}
+.person-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.person-company{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.person-role{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.tag-none{background:var(--bg4);color:var(--text3);border:1px solid var(--border)}
+.sc-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.person-actions{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.sel-act{font-size:11px;font-family:inherit;border:1px solid var(--border2);border-radius:var(--radius);padding:4px 6px;background:var(--bg3);color:var(--text);cursor:pointer;max-width:115px}
+.sel-act:focus{outline:none;border-color:var(--accent)}
+.chk-sc{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--text2);cursor:pointer;white-space:nowrap}
+.chk-sc input{cursor:pointer;accent-color:var(--accent)}
+.right-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:14px;overflow:hidden}
+.right-card-head{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.act-row{display:flex;align-items:center;gap:7px;padding:8px 13px;border-bottom:1px solid var(--border);font-size:13px;transition:background .12s}
+.act-row:last-child{border-bottom:none}
+.act-row:hover{background:var(--bg3)}
+.act-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.act-name{flex:1;font-weight:500}
+.act-info{font-size:11px;color:var(--text3)}
+.act-del{background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 4px;border-radius:4px;font-size:12px;line-height:1}
+.act-del:hover{color:var(--danger)}
+.sc-body{padding:13px}
+.sc-nums{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px}
+.sc-big{font-size:30px;font-weight:700;line-height:1}
+.sc-lbl{font-size:11px;color:var(--text3);margin-top:2px}
+.sc-right{text-align:right}
+.sc-right .sc-big{font-size:20px;color:var(--text2)}
+.sc-bar-wrap{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.sc-bar-fill{height:100%;border-radius:3px;transition:width .4s,background .4s}
+.summary-group{padding:8px 13px;border-bottom:1px solid var(--border)}
+.summary-group:last-child{border-bottom:none}
+.summary-group-head{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.summary-chips{display:flex;flex-wrap:wrap;gap:4px}
+.summary-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:500}
+.empty-row{padding:16px;text-align:center;font-size:13px;color:var(--text3);background:var(--bg2)}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:1.4rem;width:360px;max-width:95vw}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:13px}
+.modal label{font-size:12px;color:var(--text2);display:block;margin-bottom:4px;margin-top:11px}
+.modal #modal-body>input,.modal #modal-body>select,.modal select{width:100%;font-size:13px;font-family:inherit;padding:7px 10px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text)}
+.modal #modal-body>input:focus,.modal select:focus{outline:none;border-color:var(--accent)}
+.modal #modal-body>input::placeholder{color:var(--text3)}
+.ws-input{font-size:13px;font-family:inherit;padding:7px 10px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text);box-sizing:border-box}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.color-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
+.color-swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color .15s}
+.color-swatch.active{border-color:var(--text)}
+.sc-edit-row{display:flex;align-items:center;gap:10px}
+.sc-edit-row input{width:80px;text-align:center;font-size:18px;font-weight:700;padding:6px}
+.sc-edit-row .sc-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.sc-edit-row .sc-btn:hover{background:var(--bg4)}
+.confirm-box{background:var(--danger-bg);border:1px solid var(--danger);border-radius:var(--radius);padding:10px 13px;font-size:12px;color:var(--danger);margin-top:10px}
+.info-box{background:var(--accent-bg);border:1px solid rgba(79,142,247,.3);border-radius:var(--radius);padding:10px 13px;font-size:12px;color:var(--accent-text);margin-top:10px;line-height:1.6}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 16px;font-size:13px;z-index:200;transform:translateY(60px);opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-color:var(--success);color:var(--success)}
+.toast.warn{border-color:var(--warning);color:var(--warning)}
+.toast.err{border-color:var(--danger);color:var(--danger)}
+.filter-bar{display:flex;flex-direction:column;gap:0;margin-bottom:10px}
+.filter-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:inherit;transition:all .15s}
+.filter-chip:hover{background:var(--bg3)}
+.filter-chip.active{color:#fff;border-color:transparent}
+.filter-chip .fc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 12px;text-align:center}
+.stat-box-val{font-size:22px;font-weight:700;color:var(--text);line-height:1}
+.stat-box-lbl{font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+.stat-box-accent{border-color:rgba(79,142,247,.3);background:rgba(79,142,247,.06)}
+.stat-box-accent .stat-box-val{color:var(--accent-text)}
+.stat-box-success{border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.06)}
+.stat-box-success .stat-box-val{color:var(--success)}
+.stat-box-danger{border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.06)}
+.stat-box-danger .stat-box-val{color:var(--danger)}
+.stat-box-warn{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)}
+.stat-box-warn .stat-box-val{color:var(--warning)}
+.loading{display:flex;align-items:center;justify-content:center;min-height:60vh;flex-direction:column;gap:12px}
+.spinner{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* snapshot modal table */
+.snap-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.snap-table th{padding:5px 8px;text-align:left;color:var(--text3);border-bottom:1px solid var(--border);font-weight:600}
+.snap-table td{padding:5px 8px;border-bottom:1px solid var(--border);color:var(--text2)}
+.snap-table tr:last-child td{border-bottom:none}
+.badge-count{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:20px;font-size:11px;font-weight:600}
+</style>
+</head>
+<body>
 
-function timeToStr(val) {
-  if (!val || val === '') return '';
-  if (val instanceof Date) {
-    return Utilities.formatDate(val, Session.getScriptTimeZone(), 'HH:mm');
+<div id="loading-screen" class="loading">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--text3)">Se conectează...</div>
+</div>
+
+<div id="app-screen" style="display:none">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo">D</div>
+      <div>
+        <div class="topbar-title">Alocare Personal — Activități</div>
+        <div class="topbar-sub">Depozit · sincronizat în timp real</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="clock" id="clock">—</div>
+      <div class="sync-pill" id="sync-pill"><span class="sdot sdot-warn"></span><span id="sync-txt">Conectare...</span></div>
+      <button class="btn btn-sm" onclick="triggerImport()">⬆ Import CSV</button>
+      <button class="btn btn-sm btn-success" onclick="exportExcel()">⬇ Istoric Excel</button>
+      <button class="btn btn-sm btn-danger" onclick="openResetModal()">↺ Zi nouă</button>
+      <button class="btn btn-sm" onclick="openSettingsModal()">⚙️ Program</button>
+      <button class="btn btn-sm" onclick="toggleTheme()" id="theme-btn">☀ Light</button>
+      <input type="file" id="csv-input" accept=".csv,.txt" style="display:none" onchange="importCSV(event)">
+    </div>
+  </div>
+
+  <div class="tab-nav">
+    <button class="tab-nav-btn active" onclick="switchTab('alocare')">Alocare</button>
+    <button class="tab-nav-btn" onclick="switchTab('raport')">📊 Raport</button>
+  </div>
+  <div id="panel-alocare" class="panel active">
+  <div class="main">
+    <div class="col-left">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px" id="stats-bar">
+        <div class="stat-box">
+          <div class="stat-box-val" id="stat-total">0</div>
+          <div class="stat-box-lbl">Total personal</div>
+        </div>
+        <div class="stat-box stat-box-danger">
+          <div class="stat-box-val" id="stat-lipsa">0</div>
+          <div class="stat-box-lbl">Lipsă</div>
+        </div>
+        <div class="stat-box stat-box-accent">
+          <div class="stat-box-val" id="stat-prezent">0</div>
+          <div class="stat-box-lbl">Prezent</div>
+        </div>
+        <div class="stat-box stat-box-warn">
+          <div class="stat-box-val" id="stat-nealocat">0</div>
+          <div class="stat-box-lbl">Nealocați</div>
+        </div>
+        <div class="stat-box stat-box-success">
+          <div class="stat-box-val" id="stat-alocat">0</div>
+          <div class="stat-box-lbl">Alocați</div>
+        </div>
+      </div>
+      <div class="section-top">
+        <span class="section-head">Listă personal</span>
+        <button class="btn btn-sm" onclick="openModal('person')">+ Adaugă persoană</button>
+      </div>
+      <div class="filter-bar" id="filter-bar"></div>
+      <div class="person-list" id="person-list"></div>
+    </div>
+    <div class="col-right">
+      <div class="right-card">
+        <div class="right-card-head">
+          <span class="section-head">Activități</span>
+          <button class="btn btn-sm" onclick="openEditActivities()">✏ Editează</button>
+        </div>
+        <div id="act-list"></div>
+      </div>
+      <div class="right-card">
+        <div class="right-card-head">
+          <span class="section-head">Scanere</span>
+          <button class="btn btn-sm" onclick="openModal('scanner')">Editează</button>
+        </div>
+        <div class="sc-body">
+          <div class="sc-nums">
+            <div><div class="sc-big" id="sc-free">20</div><div class="sc-lbl">disponibile</div></div>
+            <div class="sc-right"><div class="sc-big" id="sc-used">0</div><div class="sc-lbl">alocate</div></div>
+          </div>
+          <div class="sc-bar-wrap"><div class="sc-bar-fill" id="sc-bar" style="width:100%"></div></div>
+          <div id="sc-necesar-row" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:12px;color:var(--text2)">Necesar suplimentar</span>
+              <span id="sc-necesar-val" style="font-size:18px;font-weight:700;color:var(--danger)">0</span>
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-top:3px">scanere peste limita disponibilă</div>
+          </div>
+          <div id="sc-breakdown" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)"></div>
+        </div>
+      </div>
+      <div class="right-card">
+        <div class="right-card-head"><span class="section-head">Rezumat activități</span></div>
+        <div id="act-summary"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div><!-- /panel-alocare -->
+  <div id="panel-raport" class="panel">
+    <div class="rpt-toolbar">
+      <label>Perioadă:</label>
+      <select class="rpt-input" id="rpt-period" onchange="rptPeriodChange()">
+        <option value="today">Azi</option>
+        <option value="week">Săptămâna aceasta</option>
+        <option value="month">Luna aceasta</option>
+        <option value="custom">Interval personalizat</option>
+      </select>
+      <span id="rpt-custom-dates" style="display:none"><input type="date" class="rpt-input" id="rpt-from"/> <span style="color:var(--text3)">—</span> <input type="date" class="rpt-input" id="rpt-to"/></span>
+      <button class="btn btn-sm btn-accent" onclick="renderRaport()">Aplică</button>
+      <span style="flex:1"></span>
+      <button class="btn btn-sm btn-success" onclick="exportExcel()">⬇ Export Excel</button>
+    </div>
+    <div id="rpt-summary" class="rpt-summary-bar" style="display:none"></div>
+    <div id="active-filter-container"></div>
+    <div class="rpt-card"><div class="rpt-card-head"><span class="rpt-section-title">Rezumat per persoană</span><span id="rpt-period-label" style="font-size:12px;color:var(--text2)"></span></div>
+      <div style="overflow-x:auto"><table class="rpt-table"><thead><tr><th>Nume</th><th>Compania</th><th>Funcția</th><th>Data</th><th>Nr.Act</th><th>Prima intrare</th><th>Ultima ieșire</th><th>Timp lucrat</th><th>Program</th><th>% Utilizare</th><th>Ore supl.</th><th>Activități</th></tr></thead><tbody id="rpt-rezumat-body"></tbody></table></div></div>
+    <div class="rpt-card" id="rpt-desf-card"><div class="rpt-card-head"><span class="rpt-section-title" id="rpt-desf-title">Desfășurător activități</span><button class="btn btn-sm" id="rpt-clear-filter" onclick="clearRptFilter()" style="display:none">✕ Resetează filtru</button></div>
+      <div style="overflow-x:auto"><table class="rpt-table"><thead><tr><th>Data</th><th>Nume</th><th>Activitate</th><th>Ora start</th><th>Ora stop</th><th>Durata</th></tr></thead><tbody id="rpt-desf-body"></tbody></table></div></div>
+  </div><!-- /panel-raport -->
+<!-- MODAL editare activități -->
+<div class="modal-bg" id="edit-act-bg">
+  <div class="modal" style="width:500px;max-width:96vw" onclick="event.stopPropagation()">
+    <h3 style="margin-bottom:14px">✏ Editează activități</h3>
+    <div id="edit-act-list" style="max-height:320px;overflow-y:auto"></div>
+    <div style="display:flex;gap:7px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)">
+      <input id="new-act-name" placeholder="Nume activitate nouă..." onkeydown="if(event.key==='Enter')addNewActInEdit()" style="flex:1;font-size:13px;font-family:inherit;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#1e2130;color:#f0f1f5;min-width:0;box-sizing:border-box"/>
+      <input type="color" id="new-act-color" value="#4f8ef7" title="Culoare" style="width:36px;height:36px;padding:2px;border-radius:8px;border:1px solid rgba(255,255,255,.15);cursor:pointer;flex-shrink:0;background:none;box-sizing:border-box"/>
+      <button class="btn btn-sm btn-accent" onclick="addNewActInEdit()">+ Adaugă</button>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn" onclick="closeEditActivities()">Anulează</button>
+      <button class="btn btn-accent" onclick="saveEditActivities()">💾 Salvează tot</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL generic -->
+<div class="modal-bg" id="modal-bg" onclick="handleOverlay(event)">
+  <div class="modal">
+    <h3 id="modal-title"></h3>
+    <div id="modal-body"></div>
+    <div class="modal-btns" id="modal-btns">
+      <button class="btn" onclick="closeModal()">Anulează</button>
+      <button class="btn btn-accent" onclick="confirmModal()">Salvează</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxaAPC4fQJlgPkaHHht3ytxW0tb_i2TVi2qx7ea9ZpTy7NryG5_I9lZ9q0WGjywjObu/exec';
+const POLL_MS = 5000;
+const SNAP_HOUR  = 18;
+const PRESET_COLORS = ['#4f8ef7','#34d399','#f59e0b','#f87171','#a78bfa','#fb7185','#22d3ee','#84cc16','#e879f9'];
+
+let state = {
+  totalScanere:20, nextPid:1, nextAid:100,
+  activities:[
+    {id:'online',   label:'Online',   color:'#4f8ef7'},
+    {id:'magazine', label:'Magazine', color:'#34d399'},
+    {id:'ferme',    label:'Ferme',    color:'#f59e0b'},
+    {id:'receptii', label:'Recepții', color:'#fb7185'},
+  ],
+  persons:[],
+  workSchedule:{
+    startTime:'07:30', endTime:'16:00',
+    breaks:[{s:'09:30',e:'09:40'},{s:'11:50',e:'12:20'},{s:'14:10',e:'14:20'}],
+    netMinutes:420,
+    weekendStart:'08:00', weekendEnd:'14:00', weekendNetMinutes:360
   }
-  return String(val);
+};
+// istoric zilnic: [{date:'26.06.2025', snapshot:[{actId,label,persons,scanere}], totalPersons, totalScanere}]
+let history = { rows: [], actLog: [] };
+let nextLogId = 1;
+
+let selectedColor   = PRESET_COLORS[0];
+let modalCb         = null;
+let isSaving        = false;
+let pendingSave     = false;
+let userActiveUntil = 0;
+let lastSnapDate    = null;
+let snapCheckTimer  = null;
+
+function userActive(){ userActiveUntil = Date.now() + 30000; }
+
+/* ══════════════════ INIT ══════════════════ */
+async function init() {
+  const ok = await fetchState(true);
+  if(ok === false){
+    document.getElementById('loading-screen').innerHTML=`<div style="color:var(--danger);font-size:13px;text-align:center;padding:2rem">Eroare conexiune. Verifică internetul și reîncarcă.</div>`;
+    return;
+  }
+  await fetchHistory();
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('app-screen').style.display='block';
+  startPolling();
+  startSnapCheck();
 }
 
-function doGet(e) {
-  var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'read';
-  var ss = SpreadsheetApp.openById(SHEET_ID);
+/* ══════════════════ API — Google Sheets ══════════════════ */
+async function fetchState(force=false){
+  if(!force && Date.now()<userActiveUntil) return;
+  try {
+    const r=await fetch(GAS_URL+'?action=read');
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(d.persons!==undefined){
+      state.persons=d.persons||[];
+      if(d.activities&&d.activities.length) state.activities=d.activities;
+      if(d.totalScanere) state.totalScanere=d.totalScanere;
+      if(d.nextPid) state.nextPid=d.nextPid;
+      if(d.nextAid) state.nextAid=d.nextAid;
+      if(d.workSchedule) state.workSchedule=d.workSchedule;
+    }
+    if(Date.now()>=userActiveUntil) render();
+    setSyncStatus('ok');
+    return true;
+  } catch(e){ setSyncStatus('err'); return false; }
+}
 
-  if (action === 'read') {
-    var result = {};
-    var ps = ss.getSheetByName('Personal');
-    if (ps && ps.getLastRow() > 1) {
-      var data = ps.getRange(2, 1, ps.getLastRow() - 1, 8).getValues();
-      result.persons = data.filter(function(r){ return r[0] !== ''; }).map(function(r){
-        return {
-          id: r[0], name: String(r[1]), company: String(r[2]), role: String(r[3]),
-          actId: r[4] || null, scaner: r[5] === 'DA',
-          startTime: timeToStr(r[6]) || null, startDate: String(r[7]) || null
-        };
-      });
-    } else {
-      result.persons = [];
+async function pushState(){
+  if(isSaving){pendingSave=true;return;}
+  isSaving=true; setSyncStatus('saving');
+  try {
+    const r=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'write',state})});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    setSyncStatus('ok');
+  } catch(e){ setSyncStatus('err'); showToast('Eroare salvare: '+e.message,'err'); }
+  finally { isSaving=false; if(pendingSave){pendingSave=false;pushState();} }
+}
+
+async function fetchHistory(){
+  try {
+    const r=await fetch(GAS_URL+'?action=readLog');
+    if(!r.ok) return;
+    const d=await r.json();
+    if(d.rows&&d.rows.length){
+      history.actLog=d.rows;
+      nextLogId=Math.max(...d.rows.map(l=>parseInt(l.id)||0))+1;
     }
-    var as = ss.getSheetByName('Activitati');
-    if (as && as.getLastRow() > 1) {
-      var adata = as.getRange(2, 1, as.getLastRow() - 1, 3).getValues();
-      result.activities = adata.filter(function(r){ return r[0] !== ''; }).map(function(r){
-        return { id: String(r[0]), label: String(r[1]), color: String(r[2]) };
-      });
-    } else {
-      result.activities = [];
+  } catch(e){ console.warn('fetchHistory:',e); }
+}
+
+async function pushHistory(){
+  const toSave=(history.actLog||[]).filter(l=>l._new);
+  if(!toSave.length) return;
+  const rows=toSave.map(l=>{const r={...l};delete r._new;return r;});
+  try {
+    await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'log',rows})});
+    history.actLog.forEach(l=>{delete l._new;});
+  } catch(e){ console.warn('pushHistory:',e); }
+}
+
+let pollTimer=null;
+function startPolling(){ if(pollTimer)clearInterval(pollTimer); pollTimer=setInterval(()=>fetchState(false),POLL_MS); }
+
+function setSyncStatus(s){
+  const dot=document.querySelector('#sync-pill .sdot'); const txt=document.getElementById('sync-txt'); if(!dot)return;
+  dot.className='sdot';
+  if(s==='ok'){dot.classList.add('sdot-ok');txt.textContent='Sincronizat';}
+  else if(s==='saving'){dot.classList.add('sdot-warn');txt.textContent='Salvare...';}
+  else{dot.classList.add('sdot-err');txt.textContent='Deconectat';}
+}
+
+/* ══════════════════ SNAPSHOT ZILNIC ══════════════════ */
+function startSnapCheck(){
+  if(snapCheckTimer) clearInterval(snapCheckTimer);
+  snapCheckTimer = setInterval(checkSnapshot, 30000); // verifică la fiecare 30s
+  checkSnapshot();
+}
+
+function calcDuration(start, stop){
+  if(!start||!stop||start==='—'||stop==='—') return '—';
+  const s=start.replace('*',''), e=stop.replace('*','');
+  const [sh,sm]=s.split(':').map(Number);
+  const [eh,em]=e.split(':').map(Number);
+  if(isNaN(sh)||isNaN(sm)||isNaN(eh)||isNaN(em)) return '—';
+  let mins=(eh*60+em)-(sh*60+sm);
+  if(mins<0) mins+=24*60;
+  return String(Math.floor(mins/60)).padStart(2,'0')+':'+String(mins%60).padStart(2,'0');
+}
+function nowTime(){ return new Date().toTimeString().slice(0,5); }
+function nowDate(){ return new Date().toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+
+function todayStr(){
+  return new Date().toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+function checkSnapshot(){
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const today = todayStr();
+
+  // Ora 18:00–18:05 și nu am făcut snapshot azi
+  if(h===SNAP_HOUR && m<5 && lastSnapDate!==today){
+    const hasData = state.persons.some(p=>p.actId);
+    if(hasData){
+      lastSnapDate = today;
+      doSnapshot(today);
     }
-    var cs = ss.getSheetByName('Config');
-    result.totalScanere = cs ? (cs.getRange('B1').getValue() || 20) : 20;
-    result.nextPid = cs ? (cs.getRange('B2').getValue() || 1) : 1;
-    result.nextAid = cs ? (cs.getRange('B3').getValue() || 100) : 100;
-    try { var wsVal = cs ? cs.getRange('B4').getValue() : ''; result.workSchedule = wsVal ? JSON.parse(wsVal) : null; } catch(e) { result.workSchedule = null; }
-    return ok(result);
+  }
+}
+
+async function doSnapshot(dateStr, silent=false, stopT=null){
+  const stop = stopT || nowTime();
+  state.persons.filter(p=>p.actId&&p.startTime).forEach(p=>closePersonInterval(p, stop, dateStr));
+  await pushHistory();
+  if(!silent) showToast('Zi salvată în Google Sheets ✓','ok');
+  else showToast('Raport zilnic salvat ✓','ok');
+}
+
+function openSnapshotNotif(dateStr, snapshot, totalPersons, totalSc){
+  document.getElementById('modal-bg').classList.add('open');
+  document.getElementById('modal-title').textContent = '📊 Snapshot zilnic salvat — '+dateStr;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="info-box">Datele de la ora 18:00 au fost salvate automat în istoricul zilnic.</div>
+    <table class="snap-table" style="margin-top:12px">
+      <thead><tr><th>Activitate</th><th>Persoane</th><th>Scanere</th></tr></thead>
+      <tbody>
+        ${snapshot.map(s=>`<tr>
+          <td style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${s.color};display:inline-block"></span>${s.label}</td>
+          <td><span class="badge-count" style="background:rgba(79,142,247,.15);color:#7aaeff">${s.persons}</span></td>
+          <td><span class="badge-count" style="background:rgba(52,211,153,.15);color:#34d399">${s.scanere}</span></td>
+        </tr>`).join('')}
+        <tr style="font-weight:600">
+          <td style="color:var(--text)">TOTAL</td>
+          <td><span class="badge-count" style="background:rgba(79,142,247,.2);color:#7aaeff">${totalPersons}</span></td>
+          <td><span class="badge-count" style="background:rgba(52,211,153,.2);color:#34d399">${totalSc}</span></td>
+        </tr>
+      </tbody>
+    </table>`;
+  document.getElementById('modal-btns').innerHTML=`
+    <button class="btn" onclick="closeModal()">OK</button>
+    <button class="btn btn-success" onclick="closeModal();exportExcel()">⬇ Descarcă Excel</button>`;
+  modalCb=null;
+}
+
+/* ══════════════════ EXPORT EXCEL ISTORIC ══════════════════ */
+async function exportExcel(){
+  await fetchHistory();
+
+  if(!history.rows.length){
+    showToast('Nu există date istorice încă','warn');
+    return;
   }
 
-  if (action === 'readLog') {
-    var ls = ss.getSheetByName('Log');
-    if (!ls || ls.getLastRow() <= 1) return ok({ rows: [] });
-    var ldata = ls.getRange(2, 1, ls.getLastRow() - 1, 10).getValues();
-    var rows = ldata.filter(function(r){ return r[0] !== ''; }).map(function(r){
-      return {
-        id: String(r[0]), date: String(r[1]), personName: String(r[2]),
-        company: String(r[3]), role: String(r[4]), actLabel: String(r[5]),
-        scaner: String(r[6]), start: timeToStr(r[7]), stop: timeToStr(r[8]),
-        duration: timeToStr(r[9])
-      };
+  // Colectează toate activitățile unice din istoric
+  const allActs = [];
+  history.rows.forEach(row=>{
+    row.snapshot.forEach(s=>{
+      if(!allActs.find(a=>a.actId===s.actId)) allActs.push({actId:s.actId,label:s.label});
     });
-    return ok({ rows: rows });
-  }
-
-  return ok({ status: 'ok' });
-}
-
-function doPost(e) {
-  var ss = SpreadsheetApp.openById(SHEET_ID);
-  var body;
-  try { body = JSON.parse(e.postData.contents); } catch (err) { return ok({ error: 'invalid json' }); }
-
-  if (body.action === 'write') {
-    var state = body.state;
-    var cs = getOrCreate(ss, 'Config');
-    cs.getRange('A1:B4').setValues([
-      ['totalScanere', state.totalScanere],
-      ['nextPid', state.nextPid],
-      ['nextAid', state.nextAid],
-      ['workSchedule', JSON.stringify(state.workSchedule || {})]
-    ]);
-    var ps = getOrCreate(ss, 'Personal');
-    ps.clearContents();
-    ps.getRange(1, 1, 1, 8).setValues([['ID', 'Nume', 'Compania', 'Functia', 'Activitate ID', 'Scaner', 'Ora start', 'Data start']]);
-    if (state.persons && state.persons.length > 0) {
-      var pLen = state.persons.length;
-      ps.getRange(2, 7, pLen, 2).setNumberFormat('@');
-      var prows = state.persons.map(function(p) {
-        return [p.id, p.name, p.company || '', p.role || '', p.actId || '', p.scaner ? 'DA' : 'NU', String(p.startTime || ''), String(p.startDate || '')];
-      });
-      ps.getRange(2, 1, pLen, 8).setValues(prows);
-    }
-    var as = getOrCreate(ss, 'Activitati');
-    as.clearContents();
-    as.getRange(1, 1, 1, 3).setValues([['ID', 'Nume', 'Culoare']]);
-    if (state.activities && state.activities.length > 0) {
-      var arows = state.activities.map(function(a) { return [a.id, a.label, a.color]; });
-      as.getRange(2, 1, arows.length, 3).setValues(arows);
-    }
-    return ok({ saved: true });
-  }
-
-  if (body.action === 'log') {
-    saveLog(ss, body.rows || []);
-    return ok({ saved: true });
-  }
-
-  return ok({ error: 'unknown action' });
-}
-
-function saveLog(ss, rows) {
-  if (!rows.length) return;
-  var ls = getOrCreate(ss, 'Log');
-  if (ls.getLastRow() === 0) {
-    ls.appendRow(['ID', 'Data', 'Nume', 'Compania', 'Functia', 'Activitate', 'Scaner', 'Ora start', 'Ora stop', 'Durata']);
-    ls.getRange(1, 1, 1, 10).setFontWeight('bold').setBackground('#1a73e8').setFontColor('#ffffff');
-    ls.setFrozenRows(1);
-  }
-  // Deduplication: get existing IDs
-  var existingIds = {};
-  if (ls.getLastRow() > 1) {
-    var ids = ls.getRange(2, 1, ls.getLastRow() - 1, 1).getValues();
-    ids.forEach(function(r) { existingIds[String(r[0])] = true; });
-  }
-  // Filter out duplicates
-  var newRows = rows.filter(function(r) { return !existingIds[String(r.id)]; });
-  if (!newRows.length) return;
-  var startRow = ls.getLastRow() + 1;
-  var len = newRows.length;
-  ls.getRange(startRow, 8, len, 3).setNumberFormat('@');
-  var data = newRows.map(function(r) {
-    return [
-      String(r.id || ''), String(r.date || ''), String(r.personName || ''),
-      String(r.company || ''), String(r.role || ''), String(r.actLabel || ''),
-      String(r.scaner || 'NU'), String(r.start || ''), String(r.stop || ''),
-      String(r.duration || '')
-    ];
   });
-  ls.getRange(startRow, 1, len, 10).setValues(data);
+  // Adaugă activitățile curente care pot fi noi
+  state.activities.forEach(a=>{
+    if(!allActs.find(x=>x.actId===a.id)) allActs.push({actId:a.id,label:a.label});
+  });
+
+  // Header row
+  const header = ['Data'];
+  allActs.forEach(a=>{ header.push(a.label+' — pers'); header.push(a.label+' — sc'); });
+  header.push('Total persoane'); header.push('Total scanere');
+
+  const wsData = [header];
+
+  history.rows.forEach(row=>{
+    const r = [row.date];
+    allActs.forEach(a=>{
+      const s = row.snapshot.find(x=>x.actId===a.actId);
+      r.push(s ? s.persons : 0);
+      r.push(s ? s.scanere : 0);
+    });
+    r.push(row.totalPersons||0);
+    r.push(row.totalScanere||0);
+    wsData.push(r);
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Stilizare coloane
+  const colWidths = wsData[0].map((h,i)=>({wch: i===0?14:18}));
+  ws['!cols'] = colWidths;
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Istoric zilnic');
+
+  // Sheet rezumat activitati curente
+  const ws2Data = [['Activitate','Persoane alocate','Scanere alocate']];
+  state.activities.forEach(a=>{
+    ws2Data.push([
+      a.label,
+      state.persons.filter(p=>p.actId===a.id).length,
+      state.persons.filter(p=>p.actId===a.id&&p.scaner).length
+    ]);
+  });
+  ws2Data.push(['TOTAL',
+    state.persons.filter(p=>p.actId).length,
+    state.persons.filter(p=>p.actId&&p.scaner).length
+  ]);
+  const ws2 = XLSX.utils.aoa_to_sheet(ws2Data);
+  ws2['!cols']=[{wch:20},{wch:20},{wch:18}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Situatie curenta');
+
+  const now=new Date();
+  const d=now.toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\./g,'-');
+  // Sheet-uri per companie
+  const companyList=[...new Set(state.persons.map(p=>p.company).filter(c=>c&&c.trim()))].sort();
+  companyList.forEach(comp=>{
+    const cPersons=state.persons.filter(p=>p.company===comp);
+    const csData=[['Nume','Functia','Activitate','Scaner','Status']];
+    cPersons.forEach(p=>{
+      const act=state.activities.find(a=>a.id===p.actId);
+      csData.push([p.name,p.role||'',act?act.label:'Nealocată',p.actId&&p.scaner?'Da':'Nu',p.actId?'Alocat':'Liber']);
+    });
+    csData.push([]);
+    csData.push(['Total',cPersons.length]);
+    csData.push(['Alocați',cPersons.filter(p=>p.actId).length]);
+    csData.push(['Cu scaner',cPersons.filter(p=>p.scaner&&p.actId).length]);
+    const csWs=XLSX.utils.aoa_to_sheet(csData);
+    csWs['!cols']=[{wch:22},{wch:16},{wch:16},{wch:10},{wch:10}];
+    XLSX.utils.book_append_sheet(wb,csWs,comp.substring(0,30));
+  });
+  XLSX.writeFile(wb, `Alocare_Depozit_${d}.xlsx`);
+  showToast('Excel descărcat ✓','ok');
 }
 
-function ok(data) {
-  return ContentService.createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON);
+/* ══════════════════ RENDER ══════════════════ */
+let activeFilter = 'all'; // 'all' | actId | 'nealocat'
+
+function render(){renderPersons();renderActivities();renderScanere();renderSummary();renderFilterBar();}
+
+function renderFilterBar(){
+  const el = document.getElementById('filter-bar');
+  const lipsaAct = state.activities.find(a=>a.label.toUpperCase()==='LIPSA'||a.label.toUpperCase()==='LIPSĂ');
+  const lipsaId  = lipsaAct ? lipsaAct.id : null;
+  const nealocat = state.persons.filter(p=>!p.actId).length;
+  const companies = [...new Set(state.persons.map(p=>p.company).filter(c=>c&&c.trim()))].sort();
+  const functions = [...new Set(state.persons.map(p=>p.role).filter(r=>r&&r.trim()))].sort();
+
+  // Rând 1: Toți + Lipsă + Companii + Funcții
+  const row1 = [];
+  row1.push(`<button class="filter-chip${activeFilter==='all'?' active':''}"
+    style="${activeFilter==='all'?'background:var(--accent);border-color:var(--accent);color:#fff':''}"
+    onclick="setFilter('all')">Toți <span style="opacity:.7">${state.persons.length}</span></button>`);
+
+  if(lipsaAct){
+    const cntLipsa = state.persons.filter(p=>p.actId===lipsaId).length;
+    const isActive = activeFilter===lipsaId;
+    row1.push(`<button class="filter-chip${isActive?' active':''}"
+      style="${isActive?`background:${lipsaAct.color};border-color:${lipsaAct.color};color:#fff`:`border-color:${hexRgba(lipsaAct.color,.5)};color:${lipsaAct.color}`}"
+      onclick="setFilter('${lipsaId}')">
+      <span class="fc-dot" style="background:${lipsaAct.color}"></span>
+      ${lipsaAct.label} <span style="opacity:.7">${cntLipsa}</span>
+    </button>`);
+  }
+
+  companies.forEach(company=>{
+    const cnt=state.persons.filter(p=>p.company===company).length;
+    const fid='company_'+company;
+    const isA=activeFilter===fid;
+    row1.push(`<button class="filter-chip${isA?' active':''}"
+      style="${isA?'background:var(--text2);border-color:var(--text2);color:var(--bg)':'border-color:var(--border2);color:var(--text2)'}"
+      onclick="setFilter('${fid}')">🏢 ${company} <span style="opacity:.7">${cnt}</span></button>`);
+  });
+
+  functions.forEach(fn=>{
+    const cnt=state.persons.filter(p=>p.role===fn).length;
+    const fid='function_'+fn;
+    const isA=activeFilter===fid;
+    row1.push(`<button class="filter-chip${isA?' active':''}"
+      style="${isA?'background:var(--text3);border-color:var(--text3);color:var(--bg)':'border-color:var(--border);color:var(--text3)'}"
+      onclick="setFilter('${fid}')">👤 ${fn} <span style="opacity:.7">${cnt}</span></button>`);
+  });
+
+  // Rând 2: Nealocați + activități (fără Lipsă)
+  const row2 = [];
+  row2.push(`<button class="filter-chip${activeFilter==='nealocat'?' active':''}"
+    style="${activeFilter==='nealocat'?'background:var(--warning);border-color:var(--warning);color:#1a1d2e':''}"
+    onclick="setFilter('nealocat')">Nealocați <span style="opacity:.7">${nealocat}</span></button>`);
+
+  state.activities.filter(a=>a.id!==lipsaId).forEach(a=>{
+    const cnt = state.persons.filter(p=>p.actId===a.id).length;
+    const isActive = activeFilter===a.id;
+    row2.push(`<button class="filter-chip${isActive?' active':''}"
+      style="${isActive?`background:${a.color};border-color:${a.color};color:#fff`:`border-color:${hexRgba(a.color,.4)};color:${a.color}`}"
+      onclick="setFilter('${a.id}')">
+      <span class="fc-dot" style="background:${a.color}"></span>
+      ${a.label} <span style="opacity:.7">${cnt}</span>
+    </button>`);
+  });
+
+  el.innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;gap:6px;width:100%">${row1.join('')}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:5px">${row2.join('')}</div>`;
 }
 
-function getOrCreate(ss, name) {
-  return ss.getSheetByName(name) || ss.insertSheet(name);
+function setFilter(f){
+  activeFilter = f;
+  renderFilterBar();
+  renderPersons();
 }
+
+function renderPersons(){
+  const el=document.getElementById('person-list');
+
+  // Găsim activitatea LIPSA
+  const lipsaAct = state.activities.find(a=>a.label.toUpperCase()==='LIPSA'||a.label.toUpperCase()==='LIPSĂ');
+  const lipsaId  = lipsaAct ? lipsaAct.id : null;
+
+  const total    = state.persons.length;
+  const lipsa    = lipsaId ? state.persons.filter(p=>p.actId===lipsaId).length : 0;
+  const prezent  = total - lipsa;
+  const alocat   = state.persons.filter(p=>p.actId && p.actId!==lipsaId).length;
+  const nealocat = prezent - alocat;
+
+  document.getElementById('stat-total').textContent    = total;
+  document.getElementById('stat-lipsa').textContent    = lipsa;
+  document.getElementById('stat-prezent').textContent  = prezent;
+  document.getElementById('stat-alocat').textContent   = alocat;
+  document.getElementById('stat-nealocat').textContent = Math.max(0,nealocat);
+
+  // Aplică filtrul
+  let filtered = state.persons;
+  if(activeFilter==='nealocat')             filtered = state.persons.filter(p=>!p.actId);
+  else if(activeFilter.startsWith('company_')) filtered = state.persons.filter(p=>p.company===activeFilter.replace('company_',''));
+  else if(activeFilter.startsWith('function_')) filtered = state.persons.filter(p=>p.role===activeFilter.replace('function_',''));
+  else if(activeFilter!=='all')             filtered = state.persons.filter(p=>p.actId===activeFilter);
+
+  if(!filtered.length){
+    el.innerHTML=`<div class="empty-row">${activeFilter==='all'?'Nicio persoană. Adaugă sau importă CSV.':'Nicio persoană în această categorie.'}</div>`;
+    return;
+  }
+  el.innerHTML=filtered.map(p=>{
+    const act=state.activities.find(a=>a.id===p.actId);
+    const hasSc=p.actId&&p.scaner;
+    const tagSty=act?`background:${hexRgba(act.color,.14)};color:${act.color};border:1px solid ${hexRgba(act.color,.3)}`:'';
+    return `<div class="person-row">
+      <div class="avatar">${initials(p.name)}</div>
+      <div class="person-info">
+        <span class="person-name">${p.name}</span>
+        <span class="person-company">${p.company||'—'}</span>
+        <span class="person-role">${p.role||'—'}</span>
+      </div>
+      <span class="${act?'tag':'tag tag-none'}" style="${tagSty}">
+        ${act?act.label:'Nealocată'}${hasSc?'<span class="sc-dot"></span>':''}${p.startTime&&p.actId?`<span style="font-size:10px;opacity:.65;margin-left:3px">${p.startTime}</span>`:''}
+      </span>
+      <div class="person-actions">
+        ${p.actId
+          ?`<button class="btn-dealloc" onclick="deallocPerson(${p.id})">×</button>`
+          :`<select class="sel-act" id="sel-${p.id}" onchange="userActive();toggleScanerChk(${p.id})" onfocus="userActive()">
+
+              <option value="">Activitate...</option>
+              ${[...state.activities].sort((a,b)=>{
+                const aL=a.label.toUpperCase()==='LIPSA'||a.label.toUpperCase()==='LIPSĂ';
+                const bL=b.label.toUpperCase()==='LIPSA'||b.label.toUpperCase()==='LIPSĂ';
+                return aL?-1:bL?1:0;
+              }).map(a=>`<option value="${a.id}">${a.label}</option>`).join('')}
+            </select>
+            <label class="chk-sc" title="Cu scaner" id="lbl-chk-${p.id}"><input type="checkbox" id="chk-${p.id}" onchange="userActive()"> 📡</label>
+            <button class="btn btn-sm" onclick="allocPerson(${p.id})">Alocă</button>`
+        }
+        <button class="btn-icon" onclick="removePerson(${p.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderActivities(){
+  const el=document.getElementById('act-list');
+  if(!state.activities.length){el.innerHTML='<div class="empty-row">Nicio activitate.</div>';return;}
+  el.innerHTML=state.activities.map(a=>{
+    const cnt=state.persons.filter(p=>p.actId===a.id).length;
+    const sc=state.persons.filter(p=>p.actId===a.id&&p.scaner).length;
+    return `<div class="act-row">
+      <div class="act-dot" style="background:${a.color}"></div>
+      <span class="act-name">${a.label}</span>
+      <span class="act-info">${cnt} pers${sc>0?' · '+sc+' sc':''}</span>
+      <button class="act-del" onclick="removeActivity('${a.id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function renderScanere(){
+  const used=usedScanere();
+  const efectiv=Math.min(used,state.totalScanere);
+  const free=Math.max(0,state.totalScanere-used);
+  const necesar=Math.max(0,used-state.totalScanere);
+  document.getElementById('sc-free').textContent=free;
+  document.getElementById('sc-used').textContent=efectiv;
+  const pct=state.totalScanere>0?(free/state.totalScanere)*100:0;
+  const bar=document.getElementById('sc-bar');
+  bar.style.width=necesar>0?'100%':pct+'%';
+  bar.style.background=necesar>0||pct<25?'#f87171':pct<50?'#fbbf24':'#34d399';
+  const necesarRow=document.getElementById('sc-necesar-row');
+  if(necesar>0){
+    necesarRow.style.display='block';
+    document.getElementById('sc-necesar-val').textContent='+'+necesar;
+  } else {
+    necesarRow.style.display='none';
+  }
+  // Breakdown scanere pe activități
+  const bd=document.getElementById('sc-breakdown');
+  if(!bd) return;
+  const actsWithSc=state.activities.map(a=>({...a,persons:state.persons.filter(p=>p.actId===a.id&&p.scaner)})).filter(a=>a.persons.length>0);
+  if(!actsWithSc.length){bd.innerHTML='';return;}
+  let cumul=0;
+  bd.innerHTML=actsWithSc.map(a=>{
+    const cnt=a.persons.length;
+    const overflowStart=Math.max(0,state.totalScanere-cumul);
+    const normal=Math.min(cnt,overflowStart);
+    const over=cnt-normal;
+    cumul+=cnt;
+    const names=a.persons.map((p,i)=>{
+      const isOver=i>=normal;
+      return `<span style="font-size:10px;padding:1px 5px;border-radius:10px;background:${isOver?'var(--danger-bg)':hexRgba(a.color,.12)};color:${isOver?'var(--danger)':a.color};border:1px solid ${isOver?'rgba(248,113,113,.3)':hexRgba(a.color,.25)};white-space:nowrap">${p.name.split(' ')[0]}${isOver?' ⚠':''}</span>`;
+    }).join('');
+    return `<div style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+        <span style="width:7px;height:7px;border-radius:50%;background:${a.color};flex-shrink:0"></span>
+        <span style="font-size:12px;font-weight:600;color:var(--text2);flex:1">${a.label}</span>
+        <span style="font-size:11px;font-weight:700;color:${over>0?'var(--danger)':a.color}">${cnt} sc${over>0?` <span style="color:var(--danger)">(+${over} peste)</span>`:''}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px">${names}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSummary(){
+  const el=document.getElementById('act-summary');
+  if(!state.activities.length){el.innerHTML='<div class="empty-row">—</div>';return;}
+  el.innerHTML=state.activities.map(a=>{
+    const list=state.persons.filter(p=>p.actId===a.id);
+    if(!list.length) return `<div class="summary-group" style="opacity:.4">
+      <div class="summary-group-head"><div class="act-dot" style="background:${a.color}"></div>
+      <span style="font-size:12px;font-weight:600;color:var(--text3)">${a.label} — nicio persoană</span></div></div>`;
+    return `<div class="summary-group">
+      <div class="summary-group-head">
+        <div class="act-dot" style="background:${a.color}"></div>
+        <span style="font-size:12px;font-weight:600;color:var(--text2)">${a.label}</span>
+        <span style="font-size:11px;color:var(--text3)">${list.length} pers</span>
+      </div>
+      <div class="summary-chips">
+        ${list.map(p=>`<span class="summary-chip" style="background:${hexRgba(a.color,.12)};color:${a.color};border:1px solid ${hexRgba(a.color,.25)}">
+          ${p.name.split(' ')[0]}${p.scaner?'<span class="sc-dot"></span>':''}
+        </span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════ ACȚIUNI ══════════════════ */
+function toggleScanerChk(pid){
+  const sel=document.getElementById('sel-'+pid);
+  const chk=document.getElementById('chk-'+pid);
+  const lbl=document.getElementById('lbl-chk-'+pid);
+  if(!sel||!chk||!lbl) return;
+  const lipsaAct=state.activities.find(a=>a.label.toUpperCase()==='LIPSA'||a.label.toUpperCase()==='LIPSĂ');
+  const isLipsa = lipsaAct && sel.value===lipsaAct.id;
+  chk.disabled = isLipsa;
+  chk.checked  = isLipsa ? false : chk.checked;
+  lbl.style.opacity = isLipsa ? '0.3' : '1';
+  lbl.style.pointerEvents = isLipsa ? 'none' : '';
+}
+
+function closePersonInterval(p, stopT, stopD){
+  if(!p.actId||!p.startTime) return;
+  if(!history.actLog) history.actLog=[];
+  const act=state.activities.find(a=>a.id===p.actId);
+  history.actLog.push({
+    id:nextLogId++, _new:true,
+    personName:p.name, company:p.company||'', role:p.role||'',
+    actId:p.actId, actLabel:act?act.label:'—',
+    scaner:p.scaner?'DA':'NU',
+    date:p.startDate||stopD, start:p.startTime, stop:stopT,
+    duration:calcDuration(p.startTime,stopT)
+  });
+}
+function allocPerson(pid){
+  const sel=document.getElementById('sel-'+pid); const chk=document.getElementById('chk-'+pid);
+  const actId=sel?sel.value:'';
+  if(!actId){showToast('Selectează o activitate mai întâi','warn');return;}
+  const wantsSc=chk?chk.checked:false;
+  const used=usedScanere();
+  if(wantsSc && used>=state.totalScanere) showToast('Atenție: depășești numărul de scanere disponibile!','warn');
+  const p=state.persons.find(x=>x.id===pid);
+  if(p){
+    if(p.actId) closePersonInterval(p,nowTime(),nowDate());
+    p.actId=actId; p.scaner=wantsSc;
+    p.startTime=nowTime(); p.startDate=nowDate();
+  }
+  userActiveUntil=Date.now()+5000; render(); pushState();
+}
+function deallocPerson(pid){
+  const p=state.persons.find(x=>x.id===pid);
+  if(p){ closePersonInterval(p,nowTime(),nowDate()); p.actId=null;p.scaner=false;p.startTime=null;p.startDate=null; }
+  userActiveUntil=Date.now()+5000; render(); pushState();
+}
+function removePerson(pid){state.persons=state.persons.filter(p=>p.id!==pid);render();pushState();}
+function removeActivity(aid){
+  state.persons.forEach(p=>{if(p.actId===aid){p.actId=null;p.scaner=false;}});
+  state.activities=state.activities.filter(a=>a.id!==aid);render();pushState();
+}
+
+/* ══════════════════ MODALS ══════════════════ */
+function resetModalBtns(){
+  document.getElementById('modal-btns').innerHTML=`
+    <button class="btn" onclick="closeModal()">Anulează</button>
+    <button class="btn btn-accent" onclick="confirmModal()">Salvează</button>`;
+}
+
+function openModal(mode){
+  userActive(); selectedColor=PRESET_COLORS[0];
+  document.getElementById('modal-bg').classList.add('open');
+  resetModalBtns();
+  const title=document.getElementById('modal-title'); const body=document.getElementById('modal-body');
+  if(mode==='person'){
+    title.textContent='Adaugă persoană';
+    body.innerHTML=`
+      <label>Nume complet</label><input id="m-name" placeholder="Prenume Nume" autofocus/>
+      <label>Compania</label><input id="m-company" placeholder="ex: SC Exemplu SRL"/>
+      <label>Funcția</label><input id="m-role" placeholder="ex: Operator"/>`;
+    modalCb=()=>{
+      const n=document.getElementById('m-name').value.trim();
+      if(!n)return false;
+      const company=document.getElementById('m-company').value.trim();
+      const role=document.getElementById('m-role').value.trim();
+      state.persons.push({id:state.nextPid++,name:n,company,role,actId:null,scaner:false});
+      showToast('Persoană adăugată','ok');return true;
+    };
+  } else if(mode==='activity'){
+    title.textContent='Activitate nouă';
+    body.innerHTML=`<label>Nume activitate</label><input id="m-aname" placeholder="ex: Sortare" autofocus/>
+      <label>Culoare</label>
+      <div class="color-row">${PRESET_COLORS.map((c,i)=>`<div class="color-swatch${i===0?' active':''}" style="background:${c}" data-color="${c}" onclick="pickColor(this)"></div>`).join('')}</div>
+      <label>Sau alege manual</label>
+      <input type="color" id="m-color" value="${PRESET_COLORS[0]}" oninput="selectedColor=this.value" style="width:50px;height:30px;padding:2px;border-radius:var(--radius);border:1px solid var(--border2);cursor:pointer;background:var(--bg3)"/>`;
+    modalCb=()=>{const n=document.getElementById('m-aname').value.trim();if(!n)return false;state.activities.push({id:'act_'+state.nextAid++,label:n,color:selectedColor});showToast('Activitate adăugată','ok');return true;};
+  } else if(mode==='scanner'){
+    title.textContent='Total scanere';
+    body.innerHTML=`<label>Număr total scanere</label>
+      <div class="sc-edit-row">
+        <button class="sc-btn" onclick="chSc(-1)">−</button>
+        <input type="number" id="m-sc" value="${state.totalScanere}" min="1" max="500"/>
+        <button class="sc-btn" onclick="chSc(1)">+</button>
+      </div>`;
+    modalCb=()=>{const v=parseInt(document.getElementById('m-sc').value);if(isNaN(v)||v<1)return false;state.totalScanere=v;showToast('Scanere actualizate','ok');return true;};
+  }
+}
+
+function openResetModal(){
+  userActive();
+  document.getElementById('modal-bg').classList.add('open');
+  resetModalBtns();
+  const nowT=new Date().toTimeString().slice(0,5);
+  document.getElementById('modal-title').textContent='Zi nouă — resetare';
+  document.getElementById('modal-body').innerHTML=`
+    <div class="confirm-box">Salvează intervalele active în Google Sheets și resetează alocările.</div>
+    <label style="margin-top:12px;display:block;font-size:12px;color:var(--text2)">Oră stop (implicit ora curentă)</label>
+    <input id="inp-stop-time" type="time" value="${nowT}" style="width:100%;font-size:14px;font-family:inherit;padding:7px 10px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text);margin-top:4px;box-sizing:border-box"/>
+    <label style="margin-top:12px;display:flex;align-items:center;gap:6px;cursor:pointer">
+      <input type="checkbox" id="chk-reset-persons" style="cursor:pointer;accent-color:var(--accent)">
+      Șterge și lista de personal
+    </label>`;
+  modalCb=async()=>{
+    const delP=document.getElementById('chk-reset-persons')?.checked;
+    const today=todayStr();
+    const hasData=state.persons.some(p=>p.actId);
+    const stopTime=document.getElementById('inp-stop-time')?.value||nowTime();
+    if(hasData) await doSnapshot(today, true, stopTime);
+    state.persons.forEach(p=>{p.actId=null;p.scaner=false;p.startTime=null;p.startDate=null;});
+    if(delP) state.persons=[];
+    render(); pushState();
+    showToast('Resetare completă ✓','ok');
+    return true;
+  };
+}
+
+function chSc(d){const el=document.getElementById('m-sc');if(el)el.value=Math.max(1,parseInt(el.value||1)+d);}
+function pickColor(el){selectedColor=el.dataset.color;document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));el.classList.add('active');const m=document.getElementById('m-color');if(m)m.value=selectedColor;}
+function closeModal(){document.getElementById('modal-bg').classList.remove('open');modalCb=null;userActiveUntil=0;}
+async function confirmModal(){if(!modalCb)return;const res=await modalCb();if(res===false)return;closeModal();render();pushState();}
+function handleOverlay(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
+
+/* ══════════════════ IMPORT CSV ══════════════════ */
+function triggerImport(){document.getElementById('csv-input').click();}
+function importCSV(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const lines=ev.target.result.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    let added=0;
+    lines.forEach(line=>{
+      const cols=line.split(',').map(c=>c.replace(/"/g,'').trim());
+      const name=cols[0];
+      if(!name||['nume','name'].includes(name.toLowerCase()))return;
+      const company=cols[1]||'';
+      const role=cols[2]||'';
+      if(!state.persons.some(p=>p.name.toLowerCase()===name.toLowerCase())){
+        state.persons.push({id:state.nextPid++,name,company,role,actId:null,scaner:false});added++;
+      }
+    });
+    render();pushState();showToast(`Import: ${added} persoane adăugate`,'ok');
+  };
+  reader.readAsText(file,'UTF-8');e.target.value='';
+}
+
+/* ══════════════════ HELPERS ══════════════════ */
+function initials(n){const p=n.trim().split(' ');return((p[0]?.[0]||'')+(p[1]?.[0]||'')).toUpperCase()}
+function hexRgba(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${a})`}
+function usedScanere(){return state.persons.filter(p=>p.scaner&&p.actId).length}
+function showToast(msg,type='ok'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.classList.remove('show'),2800)}
+
+function toggleTheme(){
+  const html=document.documentElement;const isDark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',isDark?'light':'dark');
+  document.getElementById('theme-btn').textContent=isDark?'🌙 Dark':'☀ Light';
+}
+
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clock').textContent=
+    now.toLocaleDateString('ro-RO',{weekday:'short',day:'numeric',month:'short'})+' · '+
+    now.toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+
+/* ══════════════════ EDITARE ACTIVITĂȚI ══════════════════ */
+let editActivitiesTemp=[];
+function openEditActivities(){
+  userActive(); userActiveUntil=Date.now()+3600000;
+  editActivitiesTemp=state.activities.map(a=>({...a}));
+  renderEditActList();
+  document.getElementById('edit-act-bg').classList.add('open');
+}
+function renderEditActList(){
+  const el=document.getElementById('edit-act-list');if(!el)return;
+  const lipsaId=(editActivitiesTemp.find(a=>a.label.toUpperCase()==='LIPSA'||a.label.toUpperCase()==='LIPSĂ')||{}).id;
+  if(!editActivitiesTemp.length){el.innerHTML='<div style="padding:12px;text-align:center;font-size:13px;color:#5c6480">Nicio activitate.</div>';return;}
+  let html='';
+  for(let i=0;i<editActivitiesTemp.length;i++){
+    const a=editActivitiesTemp[i];const isLipsa=a.id===lipsaId;
+    const lbl=a.label.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    const opac=isLipsa?';opacity:.5':'';
+    html+=`<div draggable="${!isLipsa}" ondragstart="actDragStart(event,${i})" ondragover="actDragOver(event,${i})" ondrop="actDragDrop(event,${i})" ondragend="actDragEnd()" id="erow${i}" style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.08);transition:opacity .15s">`;
+    html+=`<span style="color:${isLipsa?'transparent':'#5c6480'};cursor:${isLipsa?'default':'grab'};font-size:18px;flex-shrink:0;user-select:none">⠿</span>`;
+    html+=`<div id="edot${i}" style="width:10px;height:10px;border-radius:50%;background:${a.color};flex-shrink:0"></div>`;
+    html+=`<input value="${lbl}" ${isLipsa?'disabled':''} oninput="editActivitiesTemp[${i}].label=this.value" placeholder="Nume activitate" style="flex:1;font-size:13px;font-family:inherit;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#1e2130;color:#f0f1f5;min-width:0;box-sizing:border-box${opac}"/>`;
+    html+=`<input type="color" value="${a.color}" ${isLipsa?'disabled':''} oninput="editActivitiesTemp[${i}].color=this.value;document.getElementById('edot${i}').style.background=this.value" style="width:36px;height:36px;padding:2px;border-radius:8px;border:1px solid rgba(255,255,255,.15);cursor:pointer;flex-shrink:0;background:none;box-sizing:border-box${opac}"/>`;
+    if(isLipsa) html+=`<span style="font-size:10px;color:#5c6480;padding:2px 8px;border:1px solid rgba(255,255,255,.08);border-radius:20px;white-space:nowrap">SPECIAL</span>`;
+    else html+=`<button onclick="deleteActInEdit(${i})" style="background:none;border:none;color:#5c6480;cursor:pointer;font-size:17px;padding:2px 6px;border-radius:4px;flex-shrink:0;line-height:1" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='#5c6480'">✕</button>`;
+    html+='</div>';
+  }
+  el.innerHTML=html;
+}
+let actDragIdx=null;
+function actDragStart(e,i){actDragIdx=i;e.dataTransfer.effectAllowed='move';setTimeout(()=>{const r=document.getElementById('erow'+i);if(r)r.style.opacity='.35';},0);}
+function actDragOver(e,i){e.preventDefault();e.dataTransfer.dropEffect='move';document.querySelectorAll('[id^="erow"]').forEach(r=>r.style.borderTop='');const r=document.getElementById('erow'+i);if(r&&i!==actDragIdx)r.style.borderTop='2px solid #4f8ef7';}
+function actDragDrop(e,i){e.preventDefault();if(actDragIdx===null||actDragIdx===i)return;const moved=editActivitiesTemp.splice(actDragIdx,1)[0];editActivitiesTemp.splice(i,0,moved);actDragIdx=null;renderEditActList();}
+function actDragEnd(){actDragIdx=null;document.querySelectorAll('[id^="erow"]').forEach(r=>{r.style.opacity='1';r.style.borderTop='';});}
+function deleteActInEdit(i){editActivitiesTemp.splice(i,1);renderEditActList();}
+function addNewActInEdit(){
+  const name=document.getElementById('new-act-name').value.trim();
+  const color=document.getElementById('new-act-color').value;
+  if(!name){showToast('Introdu un nume','warn');return;}
+  editActivitiesTemp.push({id:'act_'+state.nextAid++,label:name,color});
+  document.getElementById('new-act-name').value='';
+  renderEditActList();
+}
+function saveEditActivities(){
+  const newIds=editActivitiesTemp.map(a=>a.id);
+  state.persons.forEach(p=>{if(p.actId&&!newIds.includes(p.actId)){p.actId=null;p.scaner=false;}});
+  state.activities=editActivitiesTemp;
+  userActiveUntil=0;
+  document.getElementById('edit-act-bg').classList.remove('open');
+  render();pushState();showToast('Activități salvate ✓','ok');
+}
+function closeEditActivities(){userActiveUntil=0;document.getElementById('edit-act-bg').classList.remove('open');}
+
+
+/* ══════════════════ SETĂRI PROGRAM ══════════════════ */
+function calcNetMinutes(){
+  const ws=state.workSchedule;
+  const toMin=t=>{const[h,m]=t.split(':').map(Number);return h*60+m;};
+  let total=toMin(ws.endTime)-toMin(ws.startTime);
+  ws.breaks.forEach(b=>{total-=(toMin(b.e)-toMin(b.s));});
+  ws.netMinutes=total;
+}
+function isWeekend(dateStr){
+  const[d,m,y]=dateStr.split('.');
+  const dt=new Date(y,m-1,d);
+  return dt.getDay()===0||dt.getDay()===6;
+}
+function getNetMinutesForDate(dateStr){
+  return isWeekend(dateStr)?state.workSchedule.weekendNetMinutes:state.workSchedule.netMinutes;
+}
+function getStartTimeForDate(dateStr){
+  return isWeekend(dateStr)?state.workSchedule.weekendStart:state.workSchedule.startTime;
+}
+function fmtMins(m){
+  if(m<=0) return '00:00';
+  return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+}
+
+function openSettingsModal(){
+  userActive();
+  document.getElementById('modal-bg').classList.add('open');
+  resetModalBtns();
+  const ws=state.workSchedule;
+  document.getElementById('modal-title').textContent='⚙️ Program de lucru';
+  const iStyle='font-size:13px;font-family:inherit;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#1e2130;color:#f0f1f5;box-sizing:border-box;width:auto;flex:1';
+  let breaksHtml=ws.breaks.map((b,i)=>
+    '<div style="display:flex;gap:6px;align-items:center;margin-top:6px">'+
+    '<input type="time" value="'+b.s+'" style="'+iStyle+'"/>'+
+    '<span style="color:#5c6480">—</span>'+
+    '<input type="time" value="'+b.e+'" style="'+iStyle+'"/>'+
+    '<button onclick="this.parentElement.remove()" style="background:none;border:none;color:#5c6480;cursor:pointer;font-size:16px">✕</button>'+
+    '</div>').join('');
+  document.getElementById('modal-body').innerHTML=
+    '<div class="info-box" style="margin-top:0;margin-bottom:12px">Setările se aplică la calculul procentului de utilizare din Raport.</div>'+
+    '<label>Program zilnic (L-V)</label>'+
+    '<div style="display:flex;gap:6px;align-items:center">'+
+    '<input type="time" id="ws-start" value="'+ws.startTime+'" style="'+iStyle+'"/>'+
+    '<span style="color:#5c6480">—</span>'+
+    '<input type="time" id="ws-end" value="'+ws.endTime+'" style="'+iStyle+'"/>'+
+    '</div>'+
+    '<label>Pauze <button class="btn btn-sm" onclick="addBreakField()" style="margin-left:8px">+ Adaugă pauză</button></label>'+
+    '<div id="breaks-container">'+breaksHtml+'</div>'+
+    '<label>Weekend (S-D)</label>'+
+    '<div style="display:flex;gap:6px;align-items:center">'+
+    '<input type="time" id="ws-we-start" value="'+ws.weekendStart+'" style="'+iStyle+'"/>'+
+    '<span style="color:#5c6480">—</span>'+
+    '<input type="time" id="ws-we-end" value="'+ws.weekendEnd+'" style="'+iStyle+'"/>'+
+    '</div>'+
+    '<div class="info-box" style="margin-top:12px">Timp net muncă: <strong>'+fmtMins(ws.netMinutes)+'</strong>/zi (L-V) · <strong>'+fmtMins(ws.weekendNetMinutes)+'</strong>/zi (S-D)</div>';
+  modalCb=()=>{
+    const ws=state.workSchedule;
+    ws.startTime=document.getElementById('ws-start').value||'07:30';
+    ws.endTime=document.getElementById('ws-end').value||'16:00';
+    ws.weekendStart=document.getElementById('ws-we-start').value||'08:00';
+    ws.weekendEnd=document.getElementById('ws-we-end').value||'14:00';
+    const brkDivs=document.querySelectorAll('#breaks-container > div');
+    ws.breaks=[];
+    brkDivs.forEach(div=>{
+      const inputs=div.querySelectorAll('input[type=time]');
+      if(inputs.length===2&&inputs[0].value&&inputs[1].value)
+        ws.breaks.push({s:inputs[0].value,e:inputs[1].value});
+    });
+    calcNetMinutes();
+    const toMin=t=>{const[h,m]=t.split(':').map(Number);return h*60+m;};
+    ws.weekendNetMinutes=toMin(ws.weekendEnd)-toMin(ws.weekendStart);
+    showToast('Program salvat ✓','ok');
+    return true;
+  };
+}
+function addBreakField(){
+  const cont=document.getElementById('breaks-container');
+  const div=document.createElement('div');
+  div.style.cssText='display:flex;gap:6px;align-items:center;margin-top:4px';
+  div.innerHTML='<input type="time" value="" style="flex:1"/><span style="color:var(--text3)">—</span><input type="time" value="" style="flex:1"/><button class="btn-icon" onclick="this.parentElement.remove()" style="font-size:14px">✕</button>';
+  cont.appendChild(div);
+}
+
+/* ══════════════════ TABS ══════════════════ */
+function switchTab(tab){
+  document.querySelectorAll('.tab-nav-btn').forEach((b,i)=>b.classList.toggle('active',['alocare','raport'][i]===tab));
+  document.getElementById('panel-alocare').classList.toggle('active',tab==='alocare');
+  document.getElementById('panel-raport').classList.toggle('active',tab==='raport');
+  if(tab==='raport'){ rptPeriodChange(); renderRaport(); }
+}
+/* ══════════════════ RAPORT ══════════════════ */
+let rptFilterName=null, rptFilterDate=null;
+function rptPeriodChange(){const v=document.getElementById('rpt-period')?.value;const cust=document.getElementById('rpt-custom-dates');if(cust)cust.style.display=v==='custom'?'flex':'none';if(v!=='custom')renderRaport();}
+function getRptDateRange(){const v=document.getElementById('rpt-period')?.value||'today';const now=new Date();const fmt=d=>d.toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'});if(v==='today')return{from:fmt(now),to:fmt(now),label:'Azi — '+fmt(now)};if(v==='week'){const mon=new Date(now);mon.setDate(now.getDate()-now.getDay()+1);return{from:fmt(mon),to:fmt(now),label:'Săptămâna aceasta'};}if(v==='month'){const m1=new Date(now.getFullYear(),now.getMonth(),1);return{from:fmt(m1),to:fmt(now),label:'Luna aceasta'};}if(v==='custom'){const f=document.getElementById('rpt-from')?.value,t=document.getElementById('rpt-to')?.value;if(!f||!t)return null;const cvt=s=>{const[y,m,d]=s.split('-');return d+'.'+m+'.'+y;};return{from:cvt(f),to:cvt(t),label:cvt(f)+' — '+cvt(t)};}return null;}
+function dateInRange(ds,from,to){const p=s=>{const[d,m,y]=s.split('.');return new Date(y,m-1,d);};return p(ds)>=p(from)&&p(ds)<=p(to);}
+function getAllLogs(){const logs=(history.actLog||[]).map(l=>({...l}));const curT=nowTime(),curD=nowDate();state.persons.filter(p=>p.actId&&p.startTime).forEach(p=>{const act=state.activities.find(a=>a.id===p.actId);logs.push({id:'cur_'+p.id,personName:p.name,company:p.company||'',role:p.role||'',actId:p.actId,actLabel:act?act.label:'—',date:p.startDate||curD,start:p.startTime,stop:curT+'*',duration:calcDuration(p.startTime,curT)+'*'});});return logs;}
+function renderRaport(){
+  const range=getRptDateRange();if(!range)return;
+  document.getElementById('rpt-period-label').textContent=range.label;
+  const allLogs=getAllLogs().filter(l=>dateInRange(l.date,range.from,range.to));
+  const sm={};
+  const isLipsa=l=>l.actLabel&&(l.actLabel.toUpperCase()==='LIPSA'||l.actLabel.toUpperCase()==='LIPSĂ');
+  allLogs.forEach(l=>{
+    const k=l.date+'__'+l.personName;
+    if(!sm[k]) sm[k]={date:l.date,name:l.personName,company:l.company,role:l.role,fs:'99:99',ls:'00:00',tm:0,acts:new Set(),numActs:0};
+    const s=sm[k];
+    const st=l.start||'',sp=(l.stop||'').replace('*','');
+    if(st&&st!=='—'&&st<s.fs) s.fs=st;
+    if(sp&&sp!=='—'&&sp>s.ls) s.ls=sp;
+    if(!isLipsa(l)){
+      const dur=(l.duration||'').replace('*','');
+      if(dur&&dur!=='—'){const[h,m]=dur.split(':').map(Number);if(!isNaN(h)&&!isNaN(m))s.tm+=h*60+m;}
+    }
+    s.acts.add(l.actLabel);
+    s.numActs++;
+  });
+  const tbody=document.getElementById('rpt-rezumat-body');
+  window._rptRows=Object.values(sm).sort((a,b)=>a.date.localeCompare(b.date)||a.name.localeCompare(b.name));
+  // Summary calculations
+  let totalPresent=0,totalUtil=0,totalOvertime=0,totalWorked=0;
+  if(!window._rptRows.length){
+    tbody.innerHTML='<tr><td colspan="12" class="rpt-empty">Nicio înregistrare în această perioadă.</td></tr>';
+    document.getElementById('rpt-summary').style.display='none';
+  } else {
+    tbody.innerHTML=window._rptRows.map((s,i)=>{
+      const h=Math.floor(s.tm/60),m=s.tm%60;
+      const workedStr=fmtMins(s.tm);
+      const netMins=getNetMinutesForDate(s.date);
+      const progStr=fmtMins(netMins);
+      const pct=netMins>0?Math.round(s.tm/netMins*100):0;
+      const overtime=Math.max(0,s.tm-netMins);
+      const otStr=overtime>0?fmtMins(overtime):'—';
+      const isWe=isWeekend(s.date);
+      const schedStart=getStartTimeForDate(s.date);
+      const isLate=s.fs!=='99:99'&&s.fs>schedStart;
+      // Util bar color
+      const barClass=pct>=90?'util-green':pct>=70?'util-yellow':'util-red';
+      const barWidth=Math.min(pct,100);
+      totalPresent++;totalWorked+=s.tm;totalUtil+=pct;
+      if(overtime>0) totalOvertime+=overtime;
+      return '<tr class="'+(isWe?'weekend-row':'')+'"><td><span class="link-cell" onclick="clickRptRow('+i+')">'+s.name+'</span></td><td>'+s.company+'</td><td>'+s.role+'</td><td>'+s.date+(isWe?' 🗓':'')+'</td><td style="text-align:center">'+s.numActs+'</td><td>'+(s.fs==='99:99'?'—':s.fs)+(isLate?'<span class="alert-late"> ⚠️</span>':'')+'</td><td>'+(s.ls==='00:00'?'—':s.ls)+'</td><td><span class="tag-dur">'+workedStr+'</span></td><td style="font-size:12px;color:var(--text3)">'+progStr+'</td><td><span style="font-weight:600;color:'+( pct>=90?'var(--success)':pct>=70?'var(--warning)':'var(--danger)')+'">'+pct+'%</span><div class="util-bar"><div class="util-fill '+barClass+'" style="width:'+barWidth+'%"></div></div></td><td>'+(otStr!=='—'?'<span style="color:var(--accent)">+'+otStr+'</span>':otStr)+'</td><td style="font-size:12px;color:var(--text2)">'+ [...s.acts].join(', ')+'</td></tr>';
+    }).join('');
+    // Summary bar
+    const avgUtil=totalPresent>0?Math.round(totalUtil/totalPresent):0;
+    document.getElementById('rpt-summary').style.display='flex';
+    document.getElementById('rpt-summary').innerHTML=
+      '<div class="rpt-summary-item"><div class="rpt-summary-val" style="color:var(--accent)">'+totalPresent+'</div><div class="rpt-summary-lbl">Persoane</div></div>'+
+      '<div class="rpt-summary-item"><div class="rpt-summary-val" style="color:var(--text)">'+fmtMins(totalWorked)+'</div><div class="rpt-summary-lbl">Total ore</div></div>'+
+      '<div class="rpt-summary-item"><div class="rpt-summary-val" style="color:'+(avgUtil>=90?'var(--success)':avgUtil>=70?'var(--warning)':'var(--danger)')+'">'+avgUtil+'%</div><div class="rpt-summary-lbl">Medie utilizare</div></div>'+
+      '<div class="rpt-summary-item"><div class="rpt-summary-val" style="color:var(--accent)">'+(totalOvertime>0?'+'+fmtMins(totalOvertime):'—')+'</div><div class="rpt-summary-lbl">Ore suplimentare</div></div>';
+  }
+  renderDesf(allLogs);
+}
+function clickRptRow(i){
+  const r=window._rptRows[i];if(!r)return;
+  filterDesf(r.name,r.date);
+}
+function filterDesf(name,date){
+  rptFilterName=name;rptFilterDate=date;
+  const range=getRptDateRange();if(!range)return;
+  renderDesf(getAllLogs().filter(l=>dateInRange(l.date,range.from,range.to)));
+  document.getElementById('rpt-desf-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function clearRptFilter(){
+  rptFilterName=null;rptFilterDate=null;
+  const range=getRptDateRange();if(!range)return;
+  renderDesf(getAllLogs().filter(l=>dateInRange(l.date,range.from,range.to)));
+}
+function renderDesf(logs){
+  let filtered=logs;
+  const fb=document.getElementById('active-filter-container'),cb=document.getElementById('rpt-clear-filter'),tt=document.getElementById('rpt-desf-title');
+  if(rptFilterName){
+    filtered=logs.filter(l=>l.personName===rptFilterName&&(!rptFilterDate||l.date===rptFilterDate));
+    tt.textContent='Desfășurător — '+rptFilterName+(rptFilterDate?' · '+rptFilterDate:'');
+    cb.style.display='';
+    fb.innerHTML='<div class="active-filter-bar">Filtru activ: <strong>'+rptFilterName+'</strong>'+(rptFilterDate?' · '+rptFilterDate:'')+' <button onclick="clearRptFilter()" style="background:none;border:none;color:var(--accent-text);cursor:pointer;font-size:14px;margin-left:4px">✕</button></div>';
+  } else {
+    tt.textContent='Desfășurător activități';cb.style.display='none';fb.innerHTML='';
+  }
+  const tbody=document.getElementById('rpt-desf-body');
+  window._desfLogs=filtered.sort((a,b)=>a.date.localeCompare(b.date)||a.personName.localeCompare(b.personName)||(a.start||'').localeCompare(b.start||''));
+  if(!window._desfLogs.length){
+    tbody.innerHTML='<tr><td colspan="6" class="rpt-empty">Nicio înregistrare.</td></tr>';return;
+  }
+  tbody.innerHTML=window._desfLogs.map((l,i)=>{
+    const act=state.activities.find(a=>a.id===l.actId);
+    const color=act?act.color:'#9ba3bb';
+    return '<tr><td>'+l.date+'</td><td><span class="link-cell" onclick="clickDesfRow('+i+')">'+l.personName+'</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:'+color+'"></span>'+l.actLabel+'</span></td><td>'+(l.start||'—')+'</td><td>'+(l.stop||'—')+'</td><td><span class="tag-dur">'+(l.duration||'—')+'</span></td></tr>';
+  }).join('');
+}
+function clickDesfRow(i){
+  const l=window._desfLogs[i];if(!l)return;
+  filterDesf(l.personName,null);
+}
+setInterval(updateClock,1000);
+updateClock();
+init();
+</script>
+</body>
+</html>
