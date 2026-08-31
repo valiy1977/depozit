@@ -1170,9 +1170,13 @@ function openSettingsModal(){
       if(inputs.length===2&&inputs[0].value&&inputs[1].value)
         ws.breaks.push({s:inputs[0].value,e:inputs[1].value});
     });
-    calcNetMinutes();
-    const toMin=t=>{const[h,m]=t.split(':').map(Number);return h*60+m;};
-    ws.weekendNetMinutes=toMin(ws.weekendEnd)-toMin(ws.weekendStart);
+    // Read net minutes from fields (manual or auto-calculated)
+    const netH=parseInt(document.getElementById('ws-net-h').value)||0;
+    const netM=parseInt(document.getElementById('ws-net-m').value)||0;
+    ws.netMinutes=netH*60+netM;
+    const weNetH=parseInt(document.getElementById('ws-we-net-h').value)||0;
+    const weNetM=parseInt(document.getElementById('ws-we-net-m').value)||0;
+    ws.weekendNetMinutes=weNetH*60+weNetM;
     showToast('Program salvat ✓','ok');
     return true;
   };
