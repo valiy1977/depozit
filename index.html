@@ -1009,6 +1009,31 @@ function updateClock(){
 }
 
 
+function autoCalcNet(){
+  const toMin=t=>{if(!t)return 0;const[h,m]=t.split(':').map(Number);return h*60+m;};
+  const s=toMin(document.getElementById('ws-start').value);
+  const e=toMin(document.getElementById('ws-end').value);
+  let total=e-s;
+  const brkDivs=document.querySelectorAll('#breaks-container > div');
+  brkDivs.forEach(div=>{
+    const inputs=div.querySelectorAll('input[type=time]');
+    if(inputs.length===2&&inputs[0].value&&inputs[1].value){
+      total-=(toMin(inputs[1].value)-toMin(inputs[0].value));
+    }
+  });
+  if(total<0) total=0;
+  document.getElementById('ws-net-h').value=Math.floor(total/60);
+  document.getElementById('ws-net-m').value=total%60;
+  // Weekend
+  const ws=toMin(document.getElementById('ws-we-start').value);
+  const we=toMin(document.getElementById('ws-we-end').value);
+  let weTotal=we-ws;
+  if(weTotal<0) weTotal=0;
+  document.getElementById('ws-we-net-h').value=Math.floor(weTotal/60);
+  document.getElementById('ws-we-net-m').value=weTotal%60;
+  showToast('Recalculat: '+ Math.floor(total/60)+'h'+String(total%60).padStart(2,'0')+' (L-V) · '+Math.floor(weTotal/60)+'h'+String(weTotal%60).padStart(2,'0')+' (S-D)','ok');
+}
+
 /* ══════════════════ EDITARE ACTIVITĂȚI ══════════════════ */
 let editActivitiesTemp=[];
 function openEditActivities(){
@@ -1117,7 +1142,21 @@ function openSettingsModal(){
     '<span style="color:#5c6480">—</span>'+
     '<input type="time" id="ws-we-end" value="'+ws.weekendEnd+'" style="'+iStyle+'"/>'+
     '</div>'+
-    '<div class="info-box" style="margin-top:12px">Timp net muncă: <strong>'+fmtMins(ws.netMinutes)+'</strong>/zi (L-V) · <strong>'+fmtMins(ws.weekendNetMinutes)+'</strong>/zi (S-D)</div>';
+    '<label>Timp net muncă zilnic (L-V) <button class="btn btn-sm" onclick="autoCalcNet()" style="margin-left:8px">↻ Recalculează</button></label>'+
+    '<div style="display:flex;gap:6px;align-items:center">'+
+    '<input type="number" id="ws-net-h" value="'+Math.floor(ws.netMinutes/60)+'" min="0" max="24" style="'+iStyle+';width:60px;flex:none;text-align:center"/>'+
+    '<span style="color:#5c6480">ore</span>'+
+    '<input type="number" id="ws-net-m" value="'+(ws.netMinutes%60)+'" min="0" max="59" style="'+iStyle+';width:60px;flex:none;text-align:center"/>'+
+    '<span style="color:#5c6480">min</span>'+
+    '</div>'+
+    '<label>Timp net muncă zilnic (S-D)</label>'+
+    '<div style="display:flex;gap:6px;align-items:center">'+
+    '<input type="number" id="ws-we-net-h" value="'+Math.floor(ws.weekendNetMinutes/60)+'" min="0" max="24" style="'+iStyle+';width:60px;flex:none;text-align:center"/>'+
+    '<span style="color:#5c6480">ore</span>'+
+    '<input type="number" id="ws-we-net-m" value="'+(ws.weekendNetMinutes%60)+'" min="0" max="59" style="'+iStyle+';width:60px;flex:none;text-align:center"/>'+
+    '<span style="color:#5c6480">min</span>'+
+    '</div>'+
+    '<div class="info-box" style="margin-top:12px">↻ Recalculează = automat din program − pauze. Sau editezi manual.</div>';
   modalCb=()=>{
     const ws=state.workSchedule;
     ws.startTime=document.getElementById('ws-start').value||'07:30';
