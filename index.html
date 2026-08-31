@@ -855,7 +855,8 @@ function closePersonInterval(p, stopT, stopD){
     actId:p.actId, actLabel:act?act.label:'—',
     scaner:p.scaner?'DA':'NU',
     date:p.startDate||stopD, start:p.startTime, stop:stopT,
-    duration:calcDuration(p.startTime,stopT)
+    duration:calcDuration(p.startTime,stopT),
+    programMin:getNetMinutesForDate(p.startDate||stopD)
   });
 }
 function allocPerson(pid){
@@ -1210,7 +1211,7 @@ function renderRaport(){
   const isLipsa=l=>l.actLabel&&(l.actLabel.toUpperCase()==='LIPSA'||l.actLabel.toUpperCase()==='LIPSĂ');
   allLogs.forEach(l=>{
     const k=l.date+'__'+l.personName;
-    if(!sm[k]) sm[k]={date:l.date,name:l.personName,company:l.company,role:l.role,fs:'99:99',ls:'00:00',tm:0,acts:new Set(),numActs:0};
+    if(!sm[k]) sm[k]={date:l.date,name:l.personName,company:l.company,role:l.role,fs:'99:99',ls:'00:00',tm:0,acts:new Set(),numActs:0,programMin:0};
     const s=sm[k];
     const st=l.start||'',sp=(l.stop||'').replace('*','');
     if(st&&st!=='—'&&st<s.fs) s.fs=st;
@@ -1221,6 +1222,7 @@ function renderRaport(){
     }
     s.acts.add(l.actLabel);
     s.numActs++;
+    if(l.programMin) s.programMin=parseInt(l.programMin)||0;
   });
   const tbody=document.getElementById('rpt-rezumat-body');
   window._rptRows=Object.values(sm).sort((a,b)=>a.date.localeCompare(b.date)||a.name.localeCompare(b.name));
@@ -1233,7 +1235,7 @@ function renderRaport(){
     tbody.innerHTML=window._rptRows.map((s,i)=>{
       const h=Math.floor(s.tm/60),m=s.tm%60;
       const workedStr=fmtMins(s.tm);
-      const netMins=getNetMinutesForDate(s.date);
+      const netMins=s.programMin||getNetMinutesForDate(s.date);
       const progStr=fmtMins(netMins);
       const pct=netMins>0?Math.round(s.tm/netMins*100):0;
       const overtime=Math.max(0,s.tm-netMins);
