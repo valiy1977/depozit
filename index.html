@@ -389,7 +389,8 @@ async function fetchState(force=false){
       if(d.totalScanere) state.totalScanere=d.totalScanere;
       if(d.nextPid) state.nextPid=d.nextPid;
       if(d.nextAid) state.nextAid=d.nextAid;
-      if(d.workSchedule) state.workSchedule=d.workSchedule;
+      if(d.workSchedule&&d.workSchedule.startTime) state.workSchedule=d.workSchedule;
+      if(!state.workSchedule.breaks) state.workSchedule.breaks=[];
     }
     if(Date.now()>=userActiveUntil) render();
     setSyncStatus('ok');
@@ -722,7 +723,7 @@ function renderPersons(){
         <span class="person-role">${p.role||'—'}</span>
       </div>
       <span class="${act?'tag':'tag tag-none'}" style="${tagSty}">
-        ${act?act.label:'Nealocată'}${hasSc?'<span class="sc-dot"></span>':''}${p.startTime&&p.actId?`<span style="font-size:10px;opacity:.65;margin-left:3px">${p.startTime}</span>`:''}
+        ${act?act.label:'Nealocată'}${hasSc?'<span class="sc-dot"></span>':''}${p.startTime&&p.actId&&!(act&&(act.label.toUpperCase()==='LIPSA'||act.label.toUpperCase()==='LIPSĂ'))?`<span style="font-size:10px;opacity:.65;margin-left:3px">${p.startTime}</span>`:''}
       </span>
       <div class="person-actions">
         ${p.actId
@@ -844,6 +845,8 @@ function toggleScanerChk(pid){
 
 function closePersonInterval(p, stopT, stopD){
   if(!p.actId||!p.startTime) return;
+  const actObj=state.activities.find(a=>a.id===p.actId);
+  if(actObj&&(actObj.label.toUpperCase()==='LIPSA'||actObj.label.toUpperCase()==='LIPSĂ')) return;
   if(!history.actLog) history.actLog=[];
   const act=state.activities.find(a=>a.id===p.actId);
   history.actLog.push({
@@ -866,7 +869,9 @@ function allocPerson(pid){
   if(p){
     if(p.actId) closePersonInterval(p,nowTime(),nowDate());
     p.actId=actId; p.scaner=wantsSc;
-    p.startTime=nowTime(); p.startDate=nowDate();
+    const isLipsaAct=state.activities.find(a=>a.id===actId&&(a.label.toUpperCase()==='LIPSA'||a.label.toUpperCase()==='LIPSĂ'));
+    if(isLipsaAct){ p.startTime=null; p.startDate=null; p.scaner=false; }
+    else { p.startTime=nowTime(); p.startDate=nowDate(); }
   }
   userActiveUntil=Date.now()+5000; render(); pushState();
 }
@@ -1085,7 +1090,8 @@ function openSettingsModal(){
   userActive();
   document.getElementById('modal-bg').classList.add('open');
   resetModalBtns();
-  const ws=state.workSchedule;
+  const ws=state.workSchedule||{startTime:'07:30',endTime:'16:00',breaks:[{s:'09:30',e:'09:40'},{s:'11:50',e:'12:20'},{s:'14:10',e:'14:20'}],netMinutes:420,weekendStart:'08:00',weekendEnd:'14:00',weekendNetMinutes:360};
+  if(!ws.breaks) ws.breaks=[];
   document.getElementById('modal-title').textContent='⚙️ Program de lucru';
   const iStyle='font-size:13px;font-family:inherit;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#1e2130;color:#f0f1f5;box-sizing:border-box;width:auto;flex:1';
   let breaksHtml=ws.breaks.map((b,i)=>
