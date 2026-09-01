@@ -484,9 +484,11 @@ function checkSnapshot(){
   }
 }
 
-async function doSnapshot(dateStr, silent=false, stopT=null){
+async function doSnapshot(dateStr, silent=false, stopT=null, obs=''){
   const stop = stopT || nowTime();
   state.persons.filter(p=>p.actId&&p.startTime).forEach(p=>closePersonInterval(p, stop, dateStr));
+  // Add observations to all entries of this day
+  if(obs) history.actLog.filter(l=>l._new&&l.date===dateStr).forEach(l=>l.obs=obs);
   await pushHistory();
   if(!silent) showToast('Zi salvată în Google Sheets ✓','ok');
   else showToast('Raport zilnic salvat ✓','ok');
@@ -723,6 +725,9 @@ function renderPersons(){
   else if(activeFilter.startsWith('function_')) filtered = state.persons.filter(p=>p.role===activeFilter.replace('function_',''));
   else if(activeFilter.startsWith('skill_')){ const sid=activeFilter.slice(6); filtered=state.persons.filter(p=>Array.isArray(p.skills)&&p.skills.indexOf(sid)>=0); }
   else if(activeFilter!=='all')             filtered = state.persons.filter(p=>p.actId===activeFilter);
+  // Search filter
+  const searchVal=(document.getElementById('search-person')?.value||'').toLowerCase();
+  if(searchVal) filtered=filtered.filter(p=>p.name.toLowerCase().includes(searchVal)||(p.company||'').toLowerCase().includes(searchVal)||(p.role||'').toLowerCase().includes(searchVal));
 
   if(!filtered.length){
     el.innerHTML=`<div class="empty-row">${activeFilter==='all'?'Nicio persoană. Adaugă sau importă CSV.':'Nicio persoană în această categorie.'}</div>`;
@@ -858,6 +863,62 @@ function toggleScanerChk(pid){
   chk.checked  = isLipsa ? false : chk.checked;
   lbl.style.opacity = isLipsa ? '0.3' : '1';
   lbl.style.pointerEvents = isLipsa ? 'none' : '';
+}
+
+function openBulkAlloc(){
+  userActive();
+  document.getElementById('modal-bg').classList.add('open');
+  resetModalBtns();
+  document.getElementById('modal-title').textContent='⚡ Alocare în masă';
+  const unalloc=state.persons.filter(p=>!p.actId);
+  const lipsaAct=state.activities.find(a=>a.label.toUpperCase()==='LIPSA'||a.label.toUpperCase()==='LIPSĂ');
+  const iStyle='font-size:13px;font-family:inherit;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#1e2130;color:#f0f1f5;box-sizing:border-box;width:100%';
+  document.getElementById('modal-body').innerHTML=
+    '<label>Activitate</label>'+
+    '<select id="bulk-act" style="'+iStyle+'">'+
+    '<option value="">— Alege activitate —</option>'+
+    (lipsaAct?'<option value="'+lipsaAct.id+'">'+lipsaAct.label+'</option>':'')+
+    state.activities.filter(a=>a.id!==(lipsaAct?lipsaAct.id:'')).map(a=>'<option value="'+a.id+'">'+a.label+'</option>').join('')+
+    '</select>'+
+    '<label style="margin-top:6px"><input type="checkbox" id="bulk-scaner" style="accent-color:var(--accent)"/> Cu scaner 📡</label>'+
+    '<label style="margin-top:10px">Selectează persoane <button class="btn btn-sm" onclick="bulkToggleAll()" style="margin-left:8px">Selectează/Deselectează tot</button></label>'+
+    '<div id="bulk-list" style="max-height:250px;overflow-y:auto;margin-top:6px;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:4px">'+
+    state.persons.map(p=>{
+      const act=state.activities.find(a=>a.id===p.actId);
+      const status=act?'<span style="font-size:10px;color:var(--text3);margin-left:4px">('+act.label+')</span>':'';
+      return '<label style="display:flex;align-items:center;gap:6px;padding:5px 8px;cursor:pointer;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        '<input type="checkbox" class="bulk-chk" value="'+p.id+'" '+(p.actId?'':'checked')+' style="accent-color:var(--accent)"/>'+
+        '<span>'+p.name+status+'</span></label>';
+    }).join('')+
+    '</div>'+
+    '<div style="margin-top:6px;font-size:11px;color:var(--text3)">Persoanele deja alocate sunt debifate. Bifează-le dacă vrei să le realoci.</div>';
+  modalCb=()=>{
+    const actId=document.getElementById('bulk-act').value;
+    if(!actId){showToast('Selectează o activitate','warn');return false;}
+    const wantsSc=document.getElementById('bulk-scaner').checked;
+    const isLipsa=state.activities.find(a=>a.id===actId&&(a.label.toUpperCase()==='LIPSA'||a.label.toUpperCase()==='LIPSĂ'));
+    const checked=document.querySelectorAll('.bulk-chk:checked');
+    if(!checked.length){showToast('Selectează cel puțin o persoană','warn');return false;}
+    let cnt=0;
+    checked.forEach(cb=>{
+      const p=state.persons.find(x=>x.id===parseInt(cb.value)||x.id===cb.value);
+      if(p){
+        if(p.actId) closePersonInterval(p,nowTime(),nowDate());
+        p.actId=actId;
+        if(isLipsa){p.scaner=false;p.startTime=null;p.startDate=null;}
+        else{p.scaner=wantsSc;p.startTime=nowTime();p.startDate=nowDate();}
+        cnt++;
+      }
+    });
+    userActiveUntil=Date.now()+10000;
+    showToast(cnt+' persoane alocate pe '+state.activities.find(a=>a.id===actId).label,'ok');
+    return true;
+  };
+}
+function bulkToggleAll(){
+  const chks=document.querySelectorAll('.bulk-chk');
+  const allChecked=[...chks].every(c=>c.checked);
+  chks.forEach(c=>c.checked=!allChecked);
 }
 
 function editPersonSkills(pid){
@@ -999,13 +1060,16 @@ function openResetModal(){
     <label style="margin-top:12px;display:flex;align-items:center;gap:6px;cursor:pointer">
       <input type="checkbox" id="chk-reset-persons" style="cursor:pointer;accent-color:var(--accent)">
       Șterge și lista de personal
-    </label>`;
+    </label>
+    <label style="margin-top:12px;display:block;font-size:12px;color:var(--text2)">Observații (opțional)</label>
+    <textarea id="inp-obs" placeholder="ex: Sistem nefuncțional 10:00-11:30, ore suplimentare..." style="width:100%;font-size:13px;font-family:inherit;padding:7px 10px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text);box-sizing:border-box;min-height:60px;resize:vertical;margin-top:4px"></textarea>`;
   modalCb=async()=>{
     const delP=document.getElementById('chk-reset-persons')?.checked;
     const today=todayStr();
     const hasData=state.persons.some(p=>p.actId);
     const stopTime=document.getElementById('inp-stop-time')?.value||nowTime();
-    if(hasData) await doSnapshot(today, true, stopTime);
+    const obs=document.getElementById('inp-obs')?.value||'';
+    if(hasData) await doSnapshot(today, true, stopTime, obs);
     state.persons.forEach(p=>{p.actId=null;p.scaner=false;p.startTime=null;p.startDate=null;});
     if(delP) state.persons=[];
     render(); pushState();
