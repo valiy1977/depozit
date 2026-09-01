@@ -880,6 +880,7 @@ function editPersonSkills(pid){
   modalCb=()=>{
     p.skills=[];
     document.querySelectorAll('.skill-edit-chk:checked').forEach(cb=>p.skills.push(cb.value));
+    userActiveUntil=Date.now()+10000;
     showToast(p.name+': '+p.skills.length+' competențe salvate','ok');
     return true;
   };
@@ -1014,7 +1015,7 @@ function openResetModal(){
 function chSc(d){const el=document.getElementById('m-sc');if(el)el.value=Math.max(1,parseInt(el.value||1)+d);}
 function pickColor(el){selectedColor=el.dataset.color;document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));el.classList.add('active');const m=document.getElementById('m-color');if(m)m.value=selectedColor;}
 function closeModal(){document.getElementById('modal-bg').classList.remove('open');modalCb=null;userActiveUntil=0;}
-async function confirmModal(){if(!modalCb)return;const res=await modalCb();if(res===false)return;closeModal();render();pushState();}
+async function confirmModal(){if(!modalCb)return;const res=await modalCb();if(res===false)return;closeModal();userActiveUntil=Date.now()+10000;render();pushState();}
 function handleOverlay(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
 
 /* ══════════════════ IMPORT CSV ══════════════════ */
