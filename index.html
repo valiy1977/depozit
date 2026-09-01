@@ -192,6 +192,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="sync-pill" id="sync-pill"><span class="sdot sdot-warn"></span><span id="sync-txt">Conectare...</span></div>
       <button class="btn btn-sm" onclick="triggerImport()">⬆ Import CSV</button>
       <button class="btn btn-sm btn-success" onclick="exportExcel()">⬇ Istoric Excel</button>
+      <button class="btn btn-sm" onclick="openObsModal()">📝 Observații</button>
       <button class="btn btn-sm btn-danger" onclick="openResetModal()">↺ Zi nouă</button>
       <button class="btn btn-sm" onclick="openSettingsModal()">⚙️ Program</button>
       <button class="btn btn-sm" onclick="toggleTheme()" id="theme-btn">☀ Light</button>
@@ -230,7 +231,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       </div>
       <div class="section-top">
         <span class="section-head">Listă personal</span>
-        <button class="btn btn-sm" onclick="openBulkAlloc()">⚡ Alocare masă</button>
+        <button class="btn btn-sm" onclick="openBulkAlloc()">⚡ Alocări multiple</button>
         <button class="btn btn-sm" onclick="openModal('person')">+ Adaugă persoană</button>
       </div>
       <div class="filter-bar" id="filter-bar"></div>
@@ -491,8 +492,8 @@ function checkSnapshot(){
 async function doSnapshot(dateStr, silent=false, stopT=null, obs=''){
   const stop = stopT || nowTime();
   state.persons.filter(p=>p.actId&&p.startTime).forEach(p=>closePersonInterval(p, stop, dateStr));
-  // Add observations to all entries of this day
-  if(obs) history.actLog.filter(l=>l._new&&l.date===dateStr).forEach(l=>l.obs=obs);
+  // Add observations only to first entry of this day
+  if(obs){ const first=history.actLog.find(l=>l._new&&l.date===dateStr); if(first) first.obs=obs; }
   await pushHistory();
   if(!silent) showToast('Zi salvată în Google Sheets ✓','ok');
   else showToast('Raport zilnic salvat ✓','ok');
@@ -873,13 +874,13 @@ function openBulkAlloc(){
   userActive();
   document.getElementById('modal-bg').classList.add('open');
   resetModalBtns();
-  document.getElementById('modal-title').textContent='⚡ Alocare în masă';
+  document.getElementById('modal-title').textContent='⚡ Alocări multiple';
   const unalloc=state.persons.filter(p=>!p.actId);
   const lipsaAct=state.activities.find(a=>a.label.toUpperCase()==='LIPSA'||a.label.toUpperCase()==='LIPSĂ');
   const iStyle='font-size:13px;font-family:inherit;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#1e2130;color:#f0f1f5;box-sizing:border-box;width:100%';
   document.getElementById('modal-body').innerHTML=
     '<label>Activitate</label>'+
-    '<select id="bulk-act" style="'+iStyle+'">'+
+    '<select id="bulk-act" onchange="filterBulkBySkill()" style="'+iStyle+'">'+
     '<option value="">— Alege activitate —</option>'+
     (lipsaAct?'<option value="'+lipsaAct.id+'">'+lipsaAct.label+'</option>':'')+
     state.activities.filter(a=>a.id!==(lipsaAct?lipsaAct.id:'')).map(a=>'<option value="'+a.id+'">'+a.label+'</option>').join('')+
@@ -919,6 +920,18 @@ function openBulkAlloc(){
     return true;
   };
 }
+function filterBulkBySkill(){
+  const actId=document.getElementById('bulk-act').value;
+  if(!actId){ document.querySelectorAll('.bulk-chk').forEach(cb=>{cb.closest('label').style.display='';}); return; }
+  const isLipsa=state.activities.find(a=>a.id===actId&&(a.label.toUpperCase()==='LIPSA'||a.label.toUpperCase()==='LIPSĂ'));
+  document.querySelectorAll('.bulk-chk').forEach(cb=>{
+    const p=state.persons.find(x=>x.id===parseInt(cb.value)||x.id===cb.value);
+    if(!p) return;
+    const hasSkill=isLipsa||!p.skills||p.skills.length===0||p.skills.indexOf(actId)>=0;
+    cb.closest('label').style.display=hasSkill?'':'none';
+    if(!hasSkill) cb.checked=false;
+  });
+}
 function bulkToggleAll(){
   const chks=document.querySelectorAll('.bulk-chk');
   const allChecked=[...chks].every(c=>c.checked);
@@ -949,6 +962,24 @@ function editPersonSkills(pid){
     document.querySelectorAll('.skill-edit-chk:checked').forEach(cb=>p.skills.push(cb.value));
     userActiveUntil=Date.now()+10000;
     showToast(p.name+': '+p.skills.length+' competențe salvate','ok');
+    return true;
+  };
+}
+
+let dayObservations = '';
+
+function openObsModal(){
+  userActive();
+  document.getElementById('modal-bg').classList.add('open');
+  resetModalBtns();
+  document.getElementById('modal-title').textContent='📝 Observații ziua curentă';
+  const iStyle='font-size:13px;font-family:inherit;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#1e2130;color:#f0f1f5;box-sizing:border-box;width:100%;min-height:80px;resize:vertical';
+  document.getElementById('modal-body').innerHTML=
+    '<div class="info-box" style="margin-top:0;margin-bottom:10px">Notează orice e relevant pentru ziua de azi. Se salvează automat la „Zi nouă".</div>'+
+    '<textarea id="obs-text" style="'+iStyle+'" placeholder="ex: Sistem nefuncțional 10:00-11:30&#10;Ore suplimentare aprobate&#10;Lipsă curent...">'+dayObservations+'</textarea>';
+  modalCb=()=>{
+    dayObservations=document.getElementById('obs-text').value;
+    showToast('Observații salvate ✓','ok');
     return true;
   };
 }
@@ -1066,17 +1097,18 @@ function openResetModal(){
       Șterge și lista de personal
     </label>
     <label style="margin-top:12px;display:block;font-size:12px;color:var(--text2)">Observații (opțional)</label>
-    <textarea id="inp-obs" placeholder="ex: Sistem nefuncțional 10:00-11:30, ore suplimentare..." style="width:100%;font-size:13px;font-family:inherit;padding:7px 10px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text);box-sizing:border-box;min-height:60px;resize:vertical;margin-top:4px"></textarea>`;
+    <textarea id="inp-obs" placeholder="ex: Sistem nefuncțional 10:00-11:30, ore suplimentare...""> style="width:100%;font-size:13px;font-family:inherit;padding:7px 10px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text);box-sizing:border-box;min-height:60px;resize:vertical;margin-top:4px"></textarea>`;
   modalCb=async()=>{
     const delP=document.getElementById('chk-reset-persons')?.checked;
     const today=todayStr();
     const hasData=state.persons.some(p=>p.actId);
     const stopTime=document.getElementById('inp-stop-time')?.value||nowTime();
-    const obs=document.getElementById('inp-obs')?.value||'';
+    const obs=document.getElementById('inp-obs')?.value||dayObservations||'';
     if(hasData) await doSnapshot(today, true, stopTime, obs);
     state.persons.forEach(p=>{p.actId=null;p.scaner=false;p.startTime=null;p.startDate=null;});
     if(delP) state.persons=[];
     render(); pushState();
+    dayObservations='';
     showToast('Resetare completă ✓','ok');
     return true;
   };
