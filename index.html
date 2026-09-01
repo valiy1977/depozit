@@ -391,6 +391,8 @@ async function fetchState(force=false){
       if(d.nextAid) state.nextAid=d.nextAid;
       if(d.workSchedule&&d.workSchedule.startTime) state.workSchedule=d.workSchedule;
       if(!state.workSchedule.breaks) state.workSchedule.breaks=[];
+      // Ensure skills is always array
+      state.persons.forEach(p=>{ if(!Array.isArray(p.skills)) p.skills=[]; });
     }
     if(Date.now()>=userActiveUntil) render();
     setSyncStatus('ok');
@@ -674,7 +676,7 @@ function renderFilterBar(){
   const row3=[];
   const lipsaIds=[lipsaId];
   state.activities.filter(a=>!lipsaIds.includes(a.id)&&a.label.toUpperCase()!=='LIPSA'&&a.label.toUpperCase()!=='LIPSĂ').forEach(a=>{
-    const cnt=state.persons.filter(p=>p.skills&&p.skills.includes(a.id)).length;
+    const cnt=state.persons.filter(p=>Array.isArray(p.skills)&&p.skills.indexOf(a.id)>=0).length;
     if(cnt===0) return;
     const fid='skill_'+a.id;
     const isA=activeFilter===fid;
@@ -719,7 +721,7 @@ function renderPersons(){
   if(activeFilter==='nealocat')             filtered = state.persons.filter(p=>!p.actId);
   else if(activeFilter.startsWith('company_')) filtered = state.persons.filter(p=>p.company===activeFilter.replace('company_',''));
   else if(activeFilter.startsWith('function_')) filtered = state.persons.filter(p=>p.role===activeFilter.replace('function_',''));
-  else if(activeFilter.startsWith('skill_')) filtered = state.persons.filter(p=>p.skills&&p.skills.includes(activeFilter.replace('skill_','')));
+  else if(activeFilter.startsWith('skill_')){ const sid=activeFilter.slice(6); filtered=state.persons.filter(p=>Array.isArray(p.skills)&&p.skills.indexOf(sid)>=0); }
   else if(activeFilter!=='all')             filtered = state.persons.filter(p=>p.actId===activeFilter);
 
   if(!filtered.length){
