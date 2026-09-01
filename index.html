@@ -670,9 +670,23 @@ function renderFilterBar(){
     </button>`);
   });
 
+  // Rând 3: Competențe
+  const row3=[];
+  const lipsaIds=[lipsaId];
+  state.activities.filter(a=>!lipsaIds.includes(a.id)&&a.label.toUpperCase()!=='LIPSA'&&a.label.toUpperCase()!=='LIPSĂ').forEach(a=>{
+    const cnt=state.persons.filter(p=>p.skills&&p.skills.includes(a.id)).length;
+    if(cnt===0) return;
+    const fid='skill_'+a.id;
+    const isA=activeFilter===fid;
+    row3.push(`<button class="filter-chip${isA?' active':''}"
+      style="${isA?`background:${a.color};border-color:${a.color};color:#fff`:`border-color:${hexRgba(a.color,.3)};color:${a.color};font-style:italic`}"
+      onclick="setFilter('${fid}')">🎓 ${a.label} <span style="opacity:.7">${cnt}</span></button>`);
+  });
+
   el.innerHTML = `
     <div style="display:flex;flex-wrap:wrap;gap:6px;width:100%">${row1.join('')}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:5px">${row2.join('')}</div>`;
+    <div style="display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:5px">${row2.join('')}</div>
+    ${row3.length?'<div style="display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:5px;padding-top:5px;border-top:1px dashed var(--border)"><span style="font-size:10px;color:var(--text3);padding:4px 0">COMPETENȚE:</span>'+row3.join('')+'</div>':''}`;
 }
 
 function setFilter(f){
@@ -705,6 +719,7 @@ function renderPersons(){
   if(activeFilter==='nealocat')             filtered = state.persons.filter(p=>!p.actId);
   else if(activeFilter.startsWith('company_')) filtered = state.persons.filter(p=>p.company===activeFilter.replace('company_',''));
   else if(activeFilter.startsWith('function_')) filtered = state.persons.filter(p=>p.role===activeFilter.replace('function_',''));
+  else if(activeFilter.startsWith('skill_')) filtered = state.persons.filter(p=>p.skills&&p.skills.includes(activeFilter.replace('skill_','')));
   else if(activeFilter!=='all')             filtered = state.persons.filter(p=>p.actId===activeFilter);
 
   if(!filtered.length){
@@ -718,9 +733,9 @@ function renderPersons(){
     return `<div class="person-row">
       <div class="avatar">${initials(p.name)}</div>
       <div class="person-info">
-        <span class="person-name">${p.name}</span>
+        <span class="person-name" style="cursor:pointer" onclick="editPersonSkills(${p.id})" title="Click pentru competențe">${p.name}</span>
         <span class="person-company">${p.company||'—'}</span>
-        <span class="person-role">${p.role||'—'}</span>
+        <span class="person-role">${p.role||'—'}${p.skills&&p.skills.length?' <span style="font-size:9px;opacity:.6">('+p.skills.length+' comp.)</span>':''}</span>
       </div>
       <span class="${act?'tag':'tag tag-none'}" style="${tagSty}">
         ${act?act.label:'Nealocată'}${hasSc?'<span class="sc-dot"></span>':''}${p.startTime&&p.actId&&!(act&&(act.label.toUpperCase()==='LIPSA'||act.label.toUpperCase()==='LIPSĂ'))?`<span style="font-size:10px;opacity:.65;margin-left:3px">${p.startTime}</span>`:''}
@@ -843,6 +858,33 @@ function toggleScanerChk(pid){
   lbl.style.pointerEvents = isLipsa ? 'none' : '';
 }
 
+function editPersonSkills(pid){
+  userActive();
+  const p=state.persons.find(x=>x.id===pid);
+  if(!p) return;
+  if(!p.skills) p.skills=[];
+  document.getElementById('modal-bg').classList.add('open');
+  resetModalBtns();
+  document.getElementById('modal-title').textContent='🎓 Competențe — '+p.name;
+  const iStyle='display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;margin:3px';
+  document.getElementById('modal-body').innerHTML=
+    '<div class="info-box" style="margin-top:0;margin-bottom:12px">Bifează activitățile pe care '+p.name+' știe să le facă.</div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:4px">'+
+    state.activities.filter(a=>a.label.toUpperCase()!=='LIPSA'&&a.label.toUpperCase()!=='LIPSĂ').map(a=>{
+      const checked=p.skills.includes(a.id)?'checked':'';
+      return '<label style="'+iStyle+';border:1px solid '+a.color+';color:'+a.color+'">'+
+        '<input type="checkbox" class="skill-edit-chk" value="'+a.id+'" '+checked+' style="accent-color:'+a.color+'"/> '+a.label+'</label>';
+    }).join('')+
+    '</div>'+
+    '<div style="margin-top:12px;font-size:12px;color:var(--text3)">Compania: <strong>'+(p.company||'—')+'</strong> · Funcția: <strong>'+(p.role||'—')+'</strong></div>';
+  modalCb=()=>{
+    p.skills=[];
+    document.querySelectorAll('.skill-edit-chk:checked').forEach(cb=>p.skills.push(cb.value));
+    showToast(p.name+': '+p.skills.length+' competențe salvate','ok');
+    return true;
+  };
+}
+
 function closePersonInterval(p, stopT, stopD){
   if(!p.actId||!p.startTime) return;
   const actObj=state.activities.find(a=>a.id===p.actId);
@@ -904,13 +946,21 @@ function openModal(mode){
     body.innerHTML=`
       <label>Nume complet</label><input id="m-name" placeholder="Prenume Nume" autofocus/>
       <label>Compania</label><input id="m-company" placeholder="ex: SC Exemplu SRL"/>
-      <label>Funcția</label><input id="m-role" placeholder="ex: Operator"/>`;
+      <label>Funcția</label><input id="m-role" placeholder="ex: Operator"/>
+      <label style="margin-top:14px">Competențe (activități pe care le știe)</label>
+      <div id="m-skills" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+        ${state.activities.filter(a=>a.label.toUpperCase()!=='LIPSA'&&a.label.toUpperCase()!=='LIPSĂ').map(a=>
+          '<label style="display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;border:1px solid '+a.color+';cursor:pointer;font-size:12px;color:'+a.color+'"><input type="checkbox" class="skill-chk" value="'+a.id+'" style="accent-color:'+a.color+'"/> '+a.label+'</label>'
+        ).join('')}
+      </div>`;
     modalCb=()=>{
       const n=document.getElementById('m-name').value.trim();
       if(!n)return false;
       const company=document.getElementById('m-company').value.trim();
       const role=document.getElementById('m-role').value.trim();
-      state.persons.push({id:state.nextPid++,name:n,company,role,actId:null,scaner:false});
+      const skills=[];
+      document.querySelectorAll('.skill-chk:checked').forEach(cb=>skills.push(cb.value));
+      state.persons.push({id:state.nextPid++,name:n,company,role,skills,actId:null,scaner:false});
       showToast('Persoană adăugată','ok');return true;
     };
   } else if(mode==='activity'){
@@ -982,7 +1032,7 @@ function importCSV(e){
       const company=cols[1]||'';
       const role=cols[2]||'';
       if(!state.persons.some(p=>p.name.toLowerCase()===name.toLowerCase())){
-        state.persons.push({id:state.nextPid++,name,company,role,actId:null,scaner:false});added++;
+        state.persons.push({id:state.nextPid++,name,company,role,skills:[],actId:null,scaner:false});added++;
       }
     });
     render();pushState();showToast(`Import: ${added} persoane adăugate`,'ok');
