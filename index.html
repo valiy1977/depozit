@@ -1097,7 +1097,8 @@ function openResetModal(){
       Șterge și lista de personal
     </label>
     <label style="margin-top:12px;display:block;font-size:12px;color:var(--text2)">Observații (opțional)</label>
-    <textarea id="inp-obs" placeholder="ex: Sistem nefuncțional 10:00-11:30, ore suplimentare...""> style="width:100%;font-size:13px;font-family:inherit;padding:7px 10px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text);box-sizing:border-box;min-height:60px;resize:vertical;margin-top:4px"></textarea>`;
+    <textarea id="inp-obs" placeholder="ex: Sistem nefuncțional 10:00-11:30, ore suplimentare..." style="width:100%;font-size:13px;font-family:inherit;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#1e2130;color:#f0f1f5;box-sizing:border-box;min-height:60px;resize:vertical;margin-top:4px"></textarea>`;
+  if(dayObservations) document.getElementById('inp-obs').value=dayObservations;
   modalCb=async()=>{
     const delP=document.getElementById('chk-reset-persons')?.checked;
     const today=todayStr();
