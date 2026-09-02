@@ -615,7 +615,8 @@ async function exportExcel(){
 }
 
 /* ══════════════════ RENDER ══════════════════ */
-let activeFilter = 'all'; // 'all' | actId | 'nealocat'
+let activeFilter = 'all';
+let filterMode = 'alloc'; // 'alloc' or 'skill' // 'all' | actId | 'nealocat'
 
 function render(){renderPersons();renderActivities();renderScanere();renderSummary();renderFilterBar();}
 
@@ -662,40 +663,44 @@ function renderFilterBar(){
       onclick="setFilter('${fid}')">👤 ${fn} <span style="opacity:.7">${cnt}</span></button>`);
   });
 
-  // Rând 2: Nealocați + activități (fără Lipsă)
+  // Rând 2: Toggle + Nealocați + activități (alocări SAU competențe)
   const row2 = [];
-  row2.push(`<button class="filter-chip${activeFilter==='nealocat'?' active':''}"
-    style="${activeFilter==='nealocat'?'background:var(--warning);border-color:var(--warning);color:#1a1d2e':''}"
-    onclick="setFilter('nealocat')">Nealocați <span style="opacity:.7">${nealocat}</span></button>`);
+  const isSkillMode = filterMode==='skill';
+  row2.push(`<button class="filter-chip" onclick="toggleFilterMode()"
+    style="background:${isSkillMode?'#6d28d9':'var(--bg3)'};border-color:${isSkillMode?'#6d28d9':'var(--border2)'};color:${isSkillMode?'#fff':'var(--text2)'};font-weight:600"
+    title="Comută între filtrare pe alocări și competențe">${isSkillMode?'🎓 Competențe':'📋 Alocări'}</button>`);
+
+  if(!isSkillMode){
+    row2.push(`<button class="filter-chip${activeFilter==='nealocat'?' active':''}"
+      style="${activeFilter==='nealocat'?'background:var(--warning);border-color:var(--warning);color:#1a1d2e':''}"
+      onclick="setFilter('nealocat')">Nealocați <span style="opacity:.7">${nealocat}</span></button>`);
+  }
 
   state.activities.filter(a=>a.id!==lipsaId).forEach(a=>{
-    const cnt = state.persons.filter(p=>p.actId===a.id).length;
-    const isActive = activeFilter===a.id;
+    const prefix = isSkillMode ? 'skill_' : '';
+    const fid = prefix + a.id;
+    const cnt = isSkillMode
+      ? state.persons.filter(p=>Array.isArray(p.skills)&&p.skills.indexOf(a.id)>=0).length
+      : state.persons.filter(p=>p.actId===a.id).length;
+    const isActive = activeFilter===fid;
     row2.push(`<button class="filter-chip${isActive?' active':''}"
       style="${isActive?`background:${a.color};border-color:${a.color};color:#fff`:`border-color:${hexRgba(a.color,.4)};color:${a.color}`}"
-      onclick="setFilter('${a.id}')">
+      onclick="setFilter('${fid}')">
+      ${isSkillMode?'🎓':''}
       <span class="fc-dot" style="background:${a.color}"></span>
       ${a.label} <span style="opacity:.7">${cnt}</span>
     </button>`);
   });
 
-  // Rând 3: Competențe
-  const row3=[];
-  const lipsaIds=[lipsaId];
-  state.activities.filter(a=>!lipsaIds.includes(a.id)&&a.label.toUpperCase()!=='LIPSA'&&a.label.toUpperCase()!=='LIPSĂ').forEach(a=>{
-    const cnt=state.persons.filter(p=>Array.isArray(p.skills)&&p.skills.indexOf(a.id)>=0).length;
-    if(cnt===0) return;
-    const fid='skill_'+a.id;
-    const isA=activeFilter===fid;
-    row3.push(`<button class="filter-chip${isA?' active':''}"
-      style="${isA?`background:${a.color};border-color:${a.color};color:#fff`:`border-color:${hexRgba(a.color,.3)};color:${a.color};font-style:italic`}"
-      onclick="setFilter('${fid}')">🎓 ${a.label} <span style="opacity:.7">${cnt}</span></button>`);
-  });
-
   el.innerHTML = `
     <div style="display:flex;flex-wrap:wrap;gap:6px;width:100%">${row1.join('')}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:5px">${row2.join('')}</div>
-    ${row3.length?'<div style="display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:5px;padding-top:5px;border-top:1px dashed var(--border)"><span style="font-size:10px;color:var(--text3);padding:4px 0">COMPETENȚE:</span>'+row3.join('')+'</div>':''}`;
+    <div style="display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:5px">${row2.join('')}</div>`;
+}
+
+function toggleFilterMode(){
+  filterMode = filterMode==='alloc' ? 'skill' : 'alloc';
+  activeFilter = 'all';
+  render();
 }
 
 function setFilter(f){
